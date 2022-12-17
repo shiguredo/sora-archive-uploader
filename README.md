@@ -67,7 +67,7 @@ https://discord.gg/shiguredo
 
 ## 優先実装
 
-- Amazon S3 SSE-S3 への対応
+- [Amazon S3 SSE-S3](https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/UsingServerSideEncryption.html) への対応
 - [Azure Blob Storage](https://azure.microsoft.com/ja-jp/products/storage/blobs/) への対応
 
 ## ライセンス
