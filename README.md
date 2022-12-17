@@ -34,6 +34,16 @@ Sora Cloud では出力されたファイルをオブジェクトストレージ
 - ウェブフックにはベーシック認証や mTLS が利用可能です
 - アップロードに失敗した場合は設定ファイルで指定した隔離ディレクトリに移動します
 
+### 対応オブジェクトストレージ
+
+- AWS S3
+- MinIO
+- GCP GCS
+- Vultr Object Storage
+- Linode Object Storage
+- DigitalOcean Spaces
+- Cloudflare R2
+
 ## まずは使ってみる
 
 config.toml に必要な情報を設定してください。
