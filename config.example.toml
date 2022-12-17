@@ -1,0 +1,64 @@
+debug = false
+
+# Sora の録画アーカイブディレクトリのフルパス
+archive_dir_full_path = ""
+# アップロードに失敗した際の待避ディレクトリのフルパス
+evacuate_dir_full_path = ""
+
+# 同時アップロード数
+upload_workers = 4
+
+# 起動中にアップロード処理を行なったファイルを記録するキャッシュの上限で、
+# 重複してアップロードしてしまうのを避けます。
+# 起動時にアップロードする録画ファイルが大量にある場合は、
+# 大きめのキャッシュサイズを設定することをおすすめします。
+uploaded_file_cache_size = 32
+
+# [log]
+
+log_dir = "."
+log_name = "sora-archive-uploader.jsonl"
+log_std_out = true
+
+# MB
+log_rotate_max_size = 200
+log_rotate_max_backups = 7
+# day
+log_rotate_max_age = 30
+log_rotate_compress = false
+
+# [object_storage]
+
+# アップロード先の S3 または S3 互換オブジェクトストレージの設定
+object_storage_endpoint = ""
+object_storage_bucket_name = ""
+object_storage_access_key_id = ""
+object_storage_secret_access_key = ""
+
+# オブジェクトストレージにアップロードが完了した際に通知するウェブフック
+# [webhook]
+
+# 空文字列の場合はウェブフックは飛ばさない
+webhook_endpoint_url = ""
+
+# ウェブフックリクエストのタイムアウト時間 (秒)
+webhook_request_timeout_s = 30
+
+# ウェブフックタイプが入ってくるヘッダー名
+webhook_type_header_name = "sora-archive-uploader-webhook-type"
+webhook_type_archive_uploaded = "archive.uploaded"
+webhook_type_split_archive_uploaded = "split-archive.uploaded"
+webhook_type_split_archive_end_uploaded = "split-archive-end.uploaded"
+webhook_type_report_uploaded = "recording-report.uploaded"
+
+# ウェブフックのベーシック認証
+# 空文字はベーシック認証を行わない
+webhook_basic_auth_username = ""
+webhook_basic_auth_password = ""
+
+# webhook で HTTPS を利用する場合にサーバーの証明書をベリファイする場合に指定
+# 指定しない場合は OS のものを利用し、サーバー名までは検証しません
+webhook_tls_verify_cacert_path = ""
+# webhook で mTLS を利用する場合に指定します
+webhook_tls_fullchain_path = ""
+webhook_tls_privkey_path = ""
