@@ -19,7 +19,7 @@ Please read https://github.com/shiguredo/oss/blob/master/README.en.md before use
 Sora が出力する録画関連のファイルを S3 または S3 互換オブジェクトストレージにアップロードするツールです。
 systemd タイマーユニットを利用しての定期実行を想定しています。
 
-[Sora Cloud](https://sora-cloud.shiguredo.jp/) で実際に利用しているツールから切り出して公開しています。
+[Sora Cloud](https://sora-cloud.shiguredo.jp/) で実際に利用している仕組みからツールとして切り出して公開しています。
 
 ## 目的
 
