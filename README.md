@@ -65,7 +65,15 @@ $ ./bin/sora-archive-uploader-dev -C config.toml
 
 https://discord.gg/shiguredo
 
-## 優先実装
+## 有償での優先実装が可能な機能一覧
+
+**詳細は Discord またはメールにてお問い合わせください**
+
+- オープンソースでの公開が前提
+- 可能であれば企業名の公開
+    - 公開が難しい場合は `企業名非公開` と書かせていただきます
+
+### 機能
 
 - [Amazon S3 SSE-S3](https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/UsingServerSideEncryption.html) への対応
 - [Azure Blob Storage](https://azure.microsoft.com/ja-jp/products/storage/blobs/) への対応
