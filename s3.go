@@ -27,14 +27,20 @@ func uploadJSONFile(
 	osConfig *S3CompatibleObjectStorage,
 	reader io.Reader, size int64, dst string,
 ) (string, error) {
+	var creds *credentials.Credentials
+	if (osConfig.AccessKeyID == "") || (osConfig.SecretAccessKey == "") {
+		creds = credentials.NewEnvAWS()
+	} else {
+		creds = credentials.NewStaticV4(
+			osConfig.AccessKeyID,
+			osConfig.SecretAccessKey,
+			"",
+		)
+	}
 	s3Client, err := minio.New(
 		osConfig.Endpoint,
 		&minio.Options{
-			Creds: credentials.NewStaticV4(
-				osConfig.AccessKeyID,
-				osConfig.SecretAccessKey,
-				"",
-			),
+			Creds:  creds,
 			Secure: true,
 		})
 	if err != nil {
@@ -69,14 +75,20 @@ func uploadJSONFile(
 }
 
 func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, file *os.File, dst string) (string, error) {
+	var creds *credentials.Credentials
+	if (osConfig.AccessKeyID == "") || (osConfig.SecretAccessKey == "") {
+		creds = credentials.NewEnvAWS()
+	} else {
+		creds = credentials.NewStaticV4(
+			osConfig.AccessKeyID,
+			osConfig.SecretAccessKey,
+			"",
+		)
+	}
 	s3Client, err := minio.New(
 		osConfig.Endpoint,
 		&minio.Options{
-			Creds: credentials.NewStaticV4(
-				osConfig.AccessKeyID,
-				osConfig.SecretAccessKey,
-				"",
-			),
+			Creds:  creds,
 			Secure: true,
 		})
 	if err != nil {
