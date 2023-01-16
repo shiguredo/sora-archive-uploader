@@ -28,14 +28,16 @@ func uploadJSONFile(
 	reader io.Reader, size int64, dst string,
 ) (string, error) {
 	var creds *credentials.Credentials
-	if (osConfig.AccessKeyID == "") || (osConfig.SecretAccessKey == "") {
-		creds = credentials.NewEnvAWS()
-	} else {
+	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
 		creds = credentials.NewStaticV4(
 			osConfig.AccessKeyID,
 			osConfig.SecretAccessKey,
 			"",
 		)
+	} else if (len(os.Getenv("AWS_ACCESS_KEY_ID")) > 0) && (len(os.Getenv("AWS_SECRET_ACCESS_KEY")) > 0) {
+		creds = credentials.NewEnvAWS()
+	} else {
+		creds = credentials.NewIAM("")
 	}
 	s3Client, err := minio.New(
 		osConfig.Endpoint,
@@ -76,14 +78,16 @@ func uploadJSONFile(
 
 func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, file *os.File, dst string) (string, error) {
 	var creds *credentials.Credentials
-	if (osConfig.AccessKeyID == "") || (osConfig.SecretAccessKey == "") {
-		creds = credentials.NewEnvAWS()
-	} else {
+	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
 		creds = credentials.NewStaticV4(
-			osConfig.AccessKeyID,
-			osConfig.SecretAccessKey,
-			"",
+				osConfig.AccessKeyID,
+				osConfig.SecretAccessKey,
+				"",
 		)
+    } else if (len(os.Getenv("AWS_ACCESS_KEY_ID")) > 0) && (len(os.Getenv("AWS_SECRET_ACCESS_KEY")) > 0) {
+            creds = credentials.NewEnvAWS()
+    } else {
+            creds = credentials.NewIAM("")
 	}
 	s3Client, err := minio.New(
 		osConfig.Endpoint,
