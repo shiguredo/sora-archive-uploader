@@ -17,4 +17,4 @@ sora-archive-uploader-prod: cmd/sora-archive-uploader/main.go
 	go build -ldflags $(LDFLAGS_PROD) -o bin/$@ $<
 
 test:
-	go test -v ./db/test
+	go test -v

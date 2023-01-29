@@ -39,12 +39,8 @@ func uploadJSONFile(
 	} else {
 		creds = credentials.NewIAM("")
 	}
-	s3Client, err := minio.New(
-		osConfig.Endpoint,
-		&minio.Options{
-			Creds:  creds,
-			Secure: true,
-		})
+		
+	s3Client, err := newS3Client(osConfig.Endpoint, creds)
 	if err != nil {
 		return "", err
 	}
@@ -89,12 +85,7 @@ func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, fi
     } else {
             creds = credentials.NewIAM("")
 	}
-	s3Client, err := minio.New(
-		osConfig.Endpoint,
-		&minio.Options{
-			Creds:  creds,
-			Secure: true,
-		})
+	s3Client, err := newS3Client(osConfig.Endpoint, creds)
 	if err != nil {
 		return "", err
 	}
@@ -146,4 +137,43 @@ func isFileContinuous(err error) bool {
 		return false
 	}
 	return true
+}
+
+
+func maybeEndpointURL(endpoint string) (string, bool) {
+	// もし endpoint に指定されたのが endpoint_url だった場合、
+	// scheme をチェックして http ならば secure = false にする
+	// さらに host だけを取り出して endpoint として扱う
+	var secure = true
+	u, err := url.Parse(endpoint)
+	// エラーがあっても無視してそのまま文字列として扱う
+	// エラーがないときだけ scheme チェックする
+	if err == nil {
+		switch (u.Scheme) {
+		case "http":
+			// http なので secure を false にする
+			secure = false	
+			return u.Host, secure
+		case "https":
+			return u.Host, secure
+		default:
+			// parse 失敗はタダの文字列として扱う
+		}
+	}	
+	return endpoint, secure
+}
+
+func newS3Client(endpoint string, credentials *credentials.Credentials) (*minio.Client, error) {
+	newEndpoint, secure := maybeEndpointURL(endpoint)
+	s3Client, err := minio.New(
+		newEndpoint,
+		&minio.Options{
+			Creds: credentials,
+			Secure: secure,
+		})
+	if err != nil {
+		return nil, err
+	}
+
+	return s3Client, nil
 }
