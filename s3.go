@@ -168,15 +168,10 @@ func maybeEndpointURL(endpoint string) (string, bool) {
 
 func newS3Client(endpoint string, credentials *credentials.Credentials) (*minio.Client, error) {
 	newEndpoint, secure := maybeEndpointURL(endpoint)
-	s3Client, err := minio.New(
+	return minio.New(
 		newEndpoint,
 		&minio.Options{
 			Creds:  credentials,
 			Secure: secure,
 		})
-	if err != nil {
-		return nil, err
-	}
-
-	return s3Client, nil
 }
