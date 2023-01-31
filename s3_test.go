@@ -18,4 +18,8 @@ func TestMaybeEndpointURL(t *testing.T) {
 	endpoint, secure = maybeEndpointURL("https://s3.example.com")
 	assert.Equal(t, "s3.example.com", endpoint)
 	assert.True(t, secure)
+
+	endpoint, secure = maybeEndpointURL("ldap://s3.example.com")
+	assert.Equal(t, "ldap://s3.example.com", endpoint)
+	assert.False(t, secure)
 }

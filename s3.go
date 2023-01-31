@@ -39,7 +39,7 @@ func uploadJSONFile(
 	} else {
 		creds = credentials.NewIAM("")
 	}
-		
+
 	s3Client, err := newS3Client(osConfig.Endpoint, creds)
 	if err != nil {
 		return "", err
@@ -76,14 +76,14 @@ func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, fi
 	var creds *credentials.Credentials
 	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
 		creds = credentials.NewStaticV4(
-				osConfig.AccessKeyID,
-				osConfig.SecretAccessKey,
-				"",
+			osConfig.AccessKeyID,
+			osConfig.SecretAccessKey,
+			"",
 		)
-    } else if (len(os.Getenv("AWS_ACCESS_KEY_ID")) > 0) && (len(os.Getenv("AWS_SECRET_ACCESS_KEY")) > 0) {
-            creds = credentials.NewEnvAWS()
-    } else {
-            creds = credentials.NewIAM("")
+	} else if (len(os.Getenv("AWS_ACCESS_KEY_ID")) > 0) && (len(os.Getenv("AWS_SECRET_ACCESS_KEY")) > 0) {
+		creds = credentials.NewEnvAWS()
+	} else {
+		creds = credentials.NewIAM("")
 	}
 	s3Client, err := newS3Client(osConfig.Endpoint, creds)
 	if err != nil {
@@ -139,27 +139,30 @@ func isFileContinuous(err error) bool {
 	return true
 }
 
-
 func maybeEndpointURL(endpoint string) (string, bool) {
 	// もし endpoint に指定されたのが endpoint_url だった場合、
 	// scheme をチェックして http ならば secure = false にする
 	// さらに host だけを取り出して endpoint として扱う
-	var secure = true
+	var secure = false
 	u, err := url.Parse(endpoint)
 	// エラーがあっても無視してそのまま文字列として扱う
 	// エラーがないときだけ scheme チェックする
 	if err == nil {
-		switch (u.Scheme) {
+		switch u.Scheme {
 		case "http":
-			// http なので secure を false にする
-			secure = false	
 			return u.Host, secure
 		case "https":
+			// https なので secure を true にする
+			secure = true
 			return u.Host, secure
+		case "":
+			// scheme なしの場合は secure を true にする
+			secure = true
+			return endpoint, secure
 		default:
-			// parse 失敗はタダの文字列として扱う
+			// サポート外の scheme の場合はタダの文字列として扱う
 		}
-	}	
+	}
 	return endpoint, secure
 }
 
@@ -168,7 +171,7 @@ func newS3Client(endpoint string, credentials *credentials.Credentials) (*minio.
 	s3Client, err := minio.New(
 		newEndpoint,
 		&minio.Options{
-			Creds: credentials,
+			Creds:  credentials,
 			Secure: secure,
 		})
 	if err != nil {
