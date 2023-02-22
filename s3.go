@@ -3,7 +3,6 @@ package archive
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -25,7 +24,7 @@ type S3CompatibleObjectStorage struct {
 func uploadJSONFile(
 	ctx context.Context,
 	osConfig *S3CompatibleObjectStorage,
-	reader io.Reader, size int64, dst string,
+	dst, filePath string,
 ) (string, error) {
 	var creds *credentials.Credentials
 	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
@@ -45,9 +44,8 @@ func uploadJSONFile(
 		return "", err
 	}
 
-	n, err := s3Client.PutObject(ctx,
-		osConfig.BucketName, dst,
-		reader, size,
+	n, err := s3Client.FPutObject(ctx,
+		osConfig.BucketName, dst, filePath,
 		minio.PutObjectOptions{ContentType: "application/octet-stream"},
 	)
 	if err != nil {
@@ -72,7 +70,7 @@ func uploadJSONFile(
 	return objectUrl, nil
 }
 
-func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, file *os.File, dst string) (string, error) {
+func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, dst, filePath string) (string, error) {
 	var creds *credentials.Credentials
 	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
 		creds = credentials.NewStaticV4(
@@ -90,17 +88,11 @@ func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, fi
 		return "", err
 	}
 
-	fileStat, err := file.Stat()
-	if err != nil {
-		return "", err
-	}
-
 	zlog.Debug().
 		Str("dst", dst).
 		Msg("WEB-UPLOAD-START")
-	n, err := s3Client.PutObject(ctx,
-		osConfig.BucketName, dst,
-		file, fileStat.Size(),
+	n, err := s3Client.FPutObject(ctx,
+		osConfig.BucketName, dst, filePath,
 		minio.PutObjectOptions{ContentType: "application/octet-stream"},
 	)
 	if err != nil {
