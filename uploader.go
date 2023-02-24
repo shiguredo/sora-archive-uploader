@@ -1,7 +1,6 @@
 package archive
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -204,7 +203,7 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 	if err != nil {
 		zlog.Error().
 			Err(err).
-			Msg("JSON-NOT-ACCESSABLE")
+			Msg("JSON-NOT-ACCESSIBLE")
 		return false
 	}
 
@@ -241,8 +240,6 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 	// webm ファイルのパスを作っておく
 	webmFilename := filepath.Base(am.Filename)
 	webmFilepath := filepath.Join(filepath.Dir(archiveJSONFilePath), webmFilename)
-	// []byte を *bytes.Reader へ
-	reader := bytes.NewReader(raw)
 
 	// metadata ファイル (json) をアップロード
 	metadataFilename := fileInfo.Name()
@@ -270,9 +267,8 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 	metadataFileURL, err := uploadJSONFile(
 		u.ctx,
 		osConfig,
-		reader,
-		reader.Size(),
 		metadataObjectKey,
+		archiveJSONFilePath,
 	)
 	if err != nil {
 		zlog.Error().
@@ -295,7 +291,7 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 		Msg("UPLOAD-METADATA-FILE-SUCCESSFULLY")
 
 	webmObjectKey := fmt.Sprintf("%s/%s", am.RecordingID, webmFilename)
-	fileURL, err := uploadWebMFile(u.ctx, osConfig, f, webmObjectKey)
+	fileURL, err := uploadWebMFile(u.ctx, osConfig, webmObjectKey, webmFilepath)
 	if err != nil {
 		zlog.Error().
 			Err(err).
@@ -406,8 +402,6 @@ func (u Uploader) handleReport(reportJSONFilePath string) bool {
 		return false
 	}
 
-	// []byte を *bytes.Reader へ
-	reader := bytes.NewReader(raw)
 	// report ファイル (json) をアップロード
 	filename := fileInfo.Name()
 	reportObjectKey := fmt.Sprintf("%s/%s", rr.RecordingID, filename)
@@ -421,8 +415,8 @@ func (u Uploader) handleReport(reportJSONFilePath string) bool {
 	fileURL, err := uploadJSONFile(
 		u.ctx,
 		osConfig,
-		reader, reader.Size(),
 		reportObjectKey,
+		reportJSONFilePath,
 	)
 	if err != nil {
 		zlog.Error().
@@ -505,7 +499,7 @@ func (u Uploader) handleArchiveEnd(archiveEndJSONFilePath string) bool {
 	if err != nil {
 		zlog.Error().
 			Err(err).
-			Msg("JSON-NOT-ACCESSABLE")
+			Msg("JSON-NOT-ACCESSIBLE")
 		return false
 	}
 
@@ -537,9 +531,6 @@ func (u Uploader) handleArchiveEnd(archiveEndJSONFilePath string) bool {
 		Str("connection_id", aem.ConnectionID).
 		Msg("ARCHIVE-END-METADATA-INFO")
 
-	// []byte を *bytes.Reader へ
-	reader := bytes.NewReader(raw)
-
 	// metadata ファイル (json) をアップロード
 	filename := fileInfo.Name()
 	objectKey := fmt.Sprintf("%s/%s", aem.RecordingID, filename)
@@ -553,8 +544,8 @@ func (u Uploader) handleArchiveEnd(archiveEndJSONFilePath string) bool {
 	archiveEndURL, err := uploadJSONFile(
 		u.ctx,
 		osConfig,
-		reader, reader.Size(),
 		objectKey,
+		archiveEndJSONFilePath,
 	)
 	if err != nil {
 		zlog.Error().
