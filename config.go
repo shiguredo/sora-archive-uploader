@@ -1,56 +1,60 @@
 package archive
 
-import (
-	"github.com/BurntSushi/toml"
-)
+import "gopkg.in/ini.v1"
 
 type Config struct {
-	Debug bool `toml:"debug"`
+	Debug bool `ini:"debug"`
 
-	LogDir              string `toml:"log_dir"`
-	LogName             string `toml:"log_name"`
-	LogStdOut           bool   `toml:"log_std_out"`
-	LogRotateMaxSize    int    `toml:"log_rotate_max_size"`
-	LogRotateMaxBackups int    `toml:"log_rotate_max_backups"`
-	LogRotateMaxAge     int    `toml:"log_rotate_max_age"`
-	LogRotateCompress   bool   `toml:"log_rotate_compress"`
+	LogDir              string `ini:"log_dir"`
+	LogName             string `ini:"log_name"`
+	LogStdOut           bool   `ini:"log_std_out"`
+	LogRotateMaxSize    int    `ini:"log_rotate_max_size"`
+	LogRotateMaxBackups int    `ini:"log_rotate_max_backups"`
+	LogRotateMaxAge     int    `ini:"log_rotate_max_age"`
+	LogRotateCompress   bool   `ini:"log_rotate_compress"`
 
-	ObjectStorageEndpoint        string `toml:"object_storage_endpoint"`
-	ObjectStorageBucketName      string `toml:"object_storage_bucket_name"`
-	ObjectStorageAccessKeyID     string `toml:"object_storage_access_key_id"`
-	ObjectStorageSecretAccessKey string `toml:"object_storage_secret_access_key"`
+	ObjectStorageEndpoint        string `ini:"object_storage_endpoint"`
+	ObjectStorageBucketName      string `ini:"object_storage_bucket_name"`
+	ObjectStorageAccessKeyID     string `ini:"object_storage_access_key_id"`
+	ObjectStorageSecretAccessKey string `ini:"object_storage_secret_access_key"`
 
-	SoraArchiveDirFullPath  string `toml:"archive_dir_full_path"`
-	SoraEvacuateDirFullPath string `toml:"evacuate_dir_full_path"`
+	SoraArchiveDirFullPath  string `ini:"archive_dir_full_path"`
+	SoraEvacuateDirFullPath string `ini:"evacuate_dir_full_path"`
 
-	UploadWorkers int `toml:"upload_workers"`
+	UploadWorkers int `ini:"upload_workers"`
 
-	UploadedFileCacheSize int `toml:"uploaded_file_cache_size"`
+	UploadedFileCacheSize int `ini:"uploaded_file_cache_size"`
 
-	WebhookEndpointURL            string `toml:"webhook_endpoint_url"`
-	WebhookEndpointHealthCheckURL string `toml:"webhook_endpoint_health_check_url"`
+	WebhookEndpointURL            string `ini:"webhook_endpoint_url"`
+	WebhookEndpointHealthCheckURL string `ini:"webhook_endpoint_health_check_url"`
 
-	WebhookTypeHeaderName              string `toml:"webhook_type_header_name"`
-	WebhookTypeArchiveUploaded         string `toml:"webhook_type_archive_uploaded"`
-	WebhookTypeSplitArchiveUploaded    string `toml:"webhook_type_split_archive_uploaded"`
-	WebhookTypeSplitArchiveEndUploaded string `toml:"webhook_type_split_archive_end_uploaded"`
-	WebhookTypeReportUploaded          string `toml:"webhook_type_report_uploaded"`
+	WebhookTypeHeaderName              string `ini:"webhook_type_header_name"`
+	WebhookTypeArchiveUploaded         string `ini:"webhook_type_archive_uploaded"`
+	WebhookTypeSplitArchiveUploaded    string `ini:"webhook_type_split_archive_uploaded"`
+	WebhookTypeSplitArchiveEndUploaded string `ini:"webhook_type_split_archive_end_uploaded"`
+	WebhookTypeReportUploaded          string `ini:"webhook_type_report_uploaded"`
 
-	WebhookBasicAuthUsername string `toml:"webhook_basic_auth_username"`
-	WebhookBasicAuthPassword string `toml:"webhook_basic_auth_password"`
+	WebhookBasicAuthUsername string `ini:"webhook_basic_auth_username"`
+	WebhookBasicAuthPassword string `ini:"webhook_basic_auth_password"`
 
-	WebhookRequestTimeoutS int32 `toml:"webhook_request_timeout_s"`
+	WebhookRequestTimeoutS int32 `ini:"webhook_request_timeout_s"`
 
-	WebhookTlsVerifyCacertPath string `toml:"webhook_tls_verify_cacert_path"`
-	WebhookTlsFullchainPath    string `toml:"webhook_tls_fullchain_path"`
-	WebhookTlsPrivkeyPath      string `toml:"webhook_tls_privkey_path"`
+	WebhookTlsVerifyCacertPath string `ini:"webhook_tls_verify_cacert_path"`
+	WebhookTlsFullchainPath    string `ini:"webhook_tls_fullchain_path"`
+	WebhookTlsPrivkeyPath      string `ini:"webhook_tls_privkey_path"`
 }
 
-func initConfig(data []byte, config interface{}) error {
-	if err := toml.Unmarshal(data, config); err != nil {
-		return err
+func NewConfig(configFilePath string) (*Config, error) {
+	config := new(Config)
+
+	iniConfig, err := ini.InsensitiveLoad(configFilePath)
+	if err != nil {
+		return nil, err
 	}
 
-	// TODO: 初期値
-	return nil
+	if err := iniConfig.StrictMapTo(config); err != nil {
+		return nil, err
+	}
+
+	return config, nil
 }
