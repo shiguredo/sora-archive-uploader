@@ -9,21 +9,13 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-
 	zlog "github.com/rs/zerolog/log"
+	"github.com/shiguredo/sora-archive-uploader/s3"
 )
-
-// config ではなくこちらにまとめる
-type S3CompatibleObjectStorage struct {
-	Endpoint        string
-	AccessKeyID     string
-	SecretAccessKey string
-	BucketName      string
-}
 
 func uploadJSONFile(
 	ctx context.Context,
-	osConfig *S3CompatibleObjectStorage,
+	osConfig *s3.S3CompatibleObjectStorage,
 	dst, filePath string,
 ) (string, error) {
 	var creds *credentials.Credentials
@@ -39,7 +31,7 @@ func uploadJSONFile(
 		creds = credentials.NewIAM("")
 	}
 
-	s3Client, err := newS3Client(osConfig.Endpoint, creds)
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds)
 	if err != nil {
 		return "", err
 	}
@@ -70,7 +62,7 @@ func uploadJSONFile(
 	return objectUrl, nil
 }
 
-func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, dst, filePath string) (string, error) {
+func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string) (string, error) {
 	var creds *credentials.Credentials
 	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
 		creds = credentials.NewStaticV4(
@@ -83,7 +75,7 @@ func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, ds
 	} else {
 		creds = credentials.NewIAM("")
 	}
-	s3Client, err := newS3Client(osConfig.Endpoint, creds)
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds)
 	if err != nil {
 		return "", err
 	}
@@ -129,41 +121,4 @@ func isFileContinuous(err error) bool {
 		return false
 	}
 	return true
-}
-
-func maybeEndpointURL(endpoint string) (string, bool) {
-	// もし endpoint に指定されたのが endpoint_url だった場合、
-	// scheme をチェックして http ならば secure = false にする
-	// さらに host だけを取り出して endpoint として扱う
-	var secure = false
-	u, err := url.Parse(endpoint)
-	// エラーがあっても無視してそのまま文字列として扱う
-	// エラーがないときだけ scheme チェックする
-	if err == nil {
-		switch u.Scheme {
-		case "http":
-			return u.Host, secure
-		case "https":
-			// https なので secure を true にする
-			secure = true
-			return u.Host, secure
-		case "":
-			// scheme なしの場合は secure を true にする
-			secure = true
-			return endpoint, secure
-		default:
-			// サポート外の scheme の場合はタダの文字列として扱う
-		}
-	}
-	return endpoint, secure
-}
-
-func newS3Client(endpoint string, credentials *credentials.Credentials) (*minio.Client, error) {
-	newEndpoint, secure := maybeEndpointURL(endpoint)
-	return minio.New(
-		newEndpoint,
-		&minio.Options{
-			Creds:  credentials,
-			Secure: secure,
-		})
 }

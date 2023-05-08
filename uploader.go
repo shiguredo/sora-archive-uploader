@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shiguredo/sora-archive-uploader/s3"
 	base32 "github.com/shogo82148/go-clockwork-base32"
 
 	zlog "github.com/rs/zerolog/log"
@@ -244,7 +245,7 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 	// metadata ファイル (json) をアップロード
 	metadataFilename := fileInfo.Name()
 	metadataObjectKey := fmt.Sprintf("%s/%s", am.RecordingID, metadataFilename)
-	osConfig := &S3CompatibleObjectStorage{
+	osConfig := &s3.S3CompatibleObjectStorage{
 		Endpoint:        u.config.ObjectStorageEndpoint,
 		BucketName:      u.config.ObjectStorageBucketName,
 		AccessKeyID:     u.config.ObjectStorageAccessKeyID,
@@ -405,7 +406,7 @@ func (u Uploader) handleReport(reportJSONFilePath string) bool {
 	// report ファイル (json) をアップロード
 	filename := fileInfo.Name()
 	reportObjectKey := fmt.Sprintf("%s/%s", rr.RecordingID, filename)
-	osConfig := &S3CompatibleObjectStorage{
+	osConfig := &s3.S3CompatibleObjectStorage{
 		Endpoint:        u.config.ObjectStorageEndpoint,
 		BucketName:      u.config.ObjectStorageBucketName,
 		AccessKeyID:     u.config.ObjectStorageAccessKeyID,
@@ -534,7 +535,7 @@ func (u Uploader) handleArchiveEnd(archiveEndJSONFilePath string) bool {
 	// metadata ファイル (json) をアップロード
 	filename := fileInfo.Name()
 	objectKey := fmt.Sprintf("%s/%s", aem.RecordingID, filename)
-	osConfig := &S3CompatibleObjectStorage{
+	osConfig := &s3.S3CompatibleObjectStorage{
 		Endpoint:        u.config.ObjectStorageEndpoint,
 		BucketName:      u.config.ObjectStorageBucketName,
 		AccessKeyID:     u.config.ObjectStorageAccessKeyID,
