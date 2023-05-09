@@ -58,8 +58,8 @@ func uploadJSONFile(
 		fmt.Sprintf("attachment; filename=\"%s\"", filename),
 	)
 
-	objectUrl := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
-	return objectUrl, nil
+	objectURL := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
+	return objectURL, nil
 }
 
 func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string) (string, error) {
@@ -105,8 +105,8 @@ func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage,
 		fmt.Sprintf("attachment; filename=\"%s\"", filename),
 	)
 
-	objectUrl := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
-	return objectUrl, nil
+	objectURL := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
+	return objectURL, nil
 }
 
 // minio のエラーをレスポンスに復元して、リトライするためファイルを残すか対象のファイルを削除するか判断する

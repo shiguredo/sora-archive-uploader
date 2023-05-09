@@ -50,14 +50,14 @@ type WebhookArchiveEndUploaded struct {
 }
 
 // mTLS を組み込んだ http.Client を構築する
-func createHttpClient(config *Config) (*http.Client, error) {
+func createHTTPClient(config *Config) (*http.Client, error) {
 	e, err := url.Parse(config.WebhookEndpointURL)
 	if err != nil {
 		return nil, err
 	}
 
 	// http または VerifyCacertPath 指定していない場合はそのまま投げる
-	if e.Scheme != "https" || config.WebhookTlsVerifyCacertPath == "" {
+	if e.Scheme != "https" || config.WebhookTLSVerifyCacertPath == "" {
 		client := &http.Client{
 			CheckRedirect: func(req *http.Request, via []*http.Request) error {
 				return http.ErrUseLastResponse
@@ -68,7 +68,7 @@ func createHttpClient(config *Config) (*http.Client, error) {
 		return client, nil
 	}
 
-	CaCert, err := os.ReadFile(config.WebhookTlsVerifyCacertPath)
+	CaCert, err := os.ReadFile(config.WebhookTLSVerifyCacertPath)
 	if err != nil {
 		return nil, err
 	}
@@ -76,8 +76,8 @@ func createHttpClient(config *Config) (*http.Client, error) {
 	caCertPool.AppendCertsFromPEM(CaCert)
 
 	var certificates []tls.Certificate
-	if config.WebhookTlsFullchainPath != "" && config.WebhookTlsPrivkeyPath != "" {
-		pair, err := tls.LoadX509KeyPair(config.WebhookTlsFullchainPath, config.WebhookTlsPrivkeyPath)
+	if config.WebhookTLSFullchainPath != "" && config.WebhookTLSPrivkeyPath != "" {
+		pair, err := tls.LoadX509KeyPair(config.WebhookTLSFullchainPath, config.WebhookTLSPrivkeyPath)
 		if err != nil {
 			return nil, err
 		}
@@ -132,7 +132,7 @@ func (u Uploader) httpClientDo(client *http.Client, webhookType string, buf []by
 }
 
 func (u Uploader) postWebhook(webhookType string, buf []byte) error {
-	client, err := createHttpClient(u.config)
+	client, err := createHTTPClient(u.config)
 	if err != nil {
 		return err
 	}

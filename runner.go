@@ -12,10 +12,10 @@ import (
 )
 
 type Main struct {
-	config Config
+	config *Config
 }
 
-func newMain(config Config) *Main {
+func newMain(config *Config) *Main {
 	return &Main{
 		config: config,
 	}
@@ -59,11 +59,11 @@ func (m *Main) run(ctx context.Context, cancel context.CancelFunc) error {
 	}
 
 	processContext, processContextCancel := context.WithCancel(context.Background())
-	gateKeeper := newGateKeeper(&m.config)
+	gateKeeper := newGateKeeper(m.config)
 	recordingFileStream := gateKeeper.run(processContext, foundFiles)
 
 	uploaderManager := newUploaderManager()
-	_, err = uploaderManager.run(processContext, &m.config, recordingFileStream)
+	_, err = uploaderManager.run(processContext, m.config, recordingFileStream)
 	if err != nil {
 		processContextCancel()
 		return err
@@ -120,15 +120,9 @@ func (m *Main) run(ctx context.Context, cancel context.CancelFunc) error {
 }
 
 func Run(configFilePath *string) {
-	buf, err := os.ReadFile(*configFilePath)
+	// INI をパース
+	config, err := newConfig(*configFilePath)
 	if err != nil {
-		// 読み込めない場合 Fatal で終了
-		log.Fatal("cannot open config file, err=", err)
-	}
-
-	// toml をパース
-	var config Config
-	if err := initConfig(buf, &config); err != nil {
 		// パースに失敗した場合 Fatal で終了
 		log.Fatal("cannot parse config file, err=", err)
 	}
@@ -142,7 +136,7 @@ func Run(configFilePath *string) {
 
 	// もしあれば mTLS の設定確認と Webhook のヘルスチェック
 	if config.WebhookEndpointHealthCheckURL != "" {
-		client, err := createHttpClient(&config)
+		client, err := createHTTPClient(config)
 		if err != nil {
 			zlog.Fatal().Err(err).Msg("FAILED-CREATE-RPC-CLIENT")
 		}

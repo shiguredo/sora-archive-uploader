@@ -1,4 +1,4 @@
-VERSION := 2022.1.0
+VERSION := 2023.1.0
 REVISION := $(shell git rev-parse --short HEAD)
 BUILD_DATE := $(shell date -u "+%Y-%m-%dT%H:%M:%SZ")
 LDFLAGS := "-X main.version=$(VERSION) -X main.revision=$(REVISION) -X main.buildDate=$(BUILD_DATE)"
@@ -17,4 +17,4 @@ sora-archive-uploader-prod: cmd/sora-archive-uploader/main.go
 	go build -ldflags $(LDFLAGS_PROD) -o bin/$@ $<
 
 test:
-	go test -v
+	go test -v ./s3
