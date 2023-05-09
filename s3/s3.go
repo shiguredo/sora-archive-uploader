@@ -7,7 +7,6 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-// config ではなくこちらにまとめる
 type S3CompatibleObjectStorage struct {
 	Endpoint        string
 	AccessKeyID     string
