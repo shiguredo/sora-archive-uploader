@@ -3,7 +3,7 @@ module github.com/shiguredo/sora-archive-uploader
 go 1.19
 
 require (
-	github.com/BurntSushi/toml v1.3.0
+	github.com/BurntSushi/toml v1.3.1
 	github.com/google/uuid v1.3.0
 	github.com/minio/minio-go/v7 v7.0.53
 	github.com/rs/zerolog v1.29.0
