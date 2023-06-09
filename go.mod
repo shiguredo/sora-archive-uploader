@@ -6,10 +6,10 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/minio/minio-go/v7 v7.0.56
 	github.com/rs/zerolog v1.29.1
-	github.com/shiguredo/lumberjack/v3 v3.0.0
 	github.com/shogo82148/go-clockwork-base32 v1.0.0
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/ini.v1 v1.67.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
 require (
