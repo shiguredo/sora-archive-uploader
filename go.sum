@@ -89,6 +89,8 @@ github.com/shiguredo/lumberjack/v3 v3.0.0 h1:IkhnjVTpg7Fl2fNAfsMn7R+No9SrnFdN5wE
 github.com/shiguredo/lumberjack/v3 v3.0.0/go.mod h1:zrQSStRcwpVudSkotZINDGYm8x03gnEQd7M+Y0OzPp0=
 github.com/shogo82148/go-clockwork-base32 v1.0.0 h1:tSLEf+tCChBr5Evbg812hYi2b+yAaZZQb9w7v5gxOn4=
 github.com/shogo82148/go-clockwork-base32 v1.0.0/go.mod h1:iMSFoMZCgiXZbDyIpEjQxr4T9dH5q8agqxt9HECoiEQ=
+github.com/shogo82148/go-clockwork-base32 v1.1.0 h1:PEqSTiyVEKdl5ar5RHlUQjFJyJTx9XZD5dUVCLG08K0=
+github.com/shogo82148/go-clockwork-base32 v1.1.0/go.mod h1:iMSFoMZCgiXZbDyIpEjQxr4T9dH5q8agqxt9HECoiEQ=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/sirupsen/logrus v1.9.2 h1:oxx1eChJGI6Uks2ZC4W1zpLlVgqB8ner4EuQwV4Ik1Y=

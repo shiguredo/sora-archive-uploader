@@ -8,7 +8,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.60
 	github.com/rs/zerolog v1.29.1
 	github.com/shiguredo/lumberjack/v3 v3.0.0
-	github.com/shogo82148/go-clockwork-base32 v1.0.0
+	github.com/shogo82148/go-clockwork-base32 v1.1.0
 	github.com/stretchr/testify v1.8.4
 )
 
