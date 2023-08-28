@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/google/uuid v1.3.1
-	github.com/minio/minio-go/v7 v7.0.62
+	github.com/minio/minio-go/v7 v7.0.63
 	github.com/rs/zerolog v1.30.0
 	github.com/shiguredo/lumberjack/v3 v3.0.0
 	github.com/shogo82148/go-clockwork-base32 v1.1.0
