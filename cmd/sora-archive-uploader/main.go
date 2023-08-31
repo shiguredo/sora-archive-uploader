@@ -22,7 +22,7 @@ build date: %s
 )
 
 func main() {
-	configFilePath := flag.String("C", "config.toml", "Config file path")
+	configFilePath := flag.String("C", "config.ini", "Config file path")
 	var v bool
 	flag.BoolVar(&v, "version", false, "Show version")
 	flag.Parse()
