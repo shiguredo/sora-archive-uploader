@@ -2,16 +2,28 @@ package archive
 
 import "gopkg.in/ini.v1"
 
+const (
+	DefaultLogDir  = "."
+	DefaultLogName = "sora-archive-uploader.jsonl"
+
+	// megabytes
+	DefaultLogRotateMaxSize    = 200
+	DefaultLogRotateMaxBackups = 7
+	// days
+	DefaultLogRotateMaxAge = 30
+)
+
 type Config struct {
 	Debug bool `ini:"debug"`
 
-	LogDir              string `ini:"log_dir"`
-	LogName             string `ini:"log_name"`
-	LogStdOut           bool   `ini:"log_std_out"`
-	LogRotateMaxSize    int    `ini:"log_rotate_max_size"`
-	LogRotateMaxBackups int    `ini:"log_rotate_max_backups"`
-	LogRotateMaxAge     int    `ini:"log_rotate_max_age"`
-	LogRotateCompress   bool   `ini:"log_rotate_compress"`
+	LogDir    string `ini:"log_dir"`
+	LogName   string `ini:"log_name"`
+	LogStdout bool   `ini:"log_stdout"`
+
+	LogRotateMaxSize    int  `ini:"log_rotate_max_size"`
+	LogRotateMaxBackups int  `ini:"log_rotate_max_backups"`
+	LogRotateMaxAge     int  `ini:"log_rotate_max_age"`
+	LogRotateCompress   bool `ini:"log_rotate_compress"`
 
 	ObjectStorageEndpoint        string `ini:"object_storage_endpoint"`
 	ObjectStorageBucketName      string `ini:"object_storage_bucket_name"`
