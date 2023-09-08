@@ -1,6 +1,13 @@
 package archive
 
-import "gopkg.in/ini.v1"
+import (
+	_ "embed"
+
+	"gopkg.in/ini.v1"
+)
+
+//go:embed VERSION
+var Version string
 
 const (
 	DefaultLogDir  = "."

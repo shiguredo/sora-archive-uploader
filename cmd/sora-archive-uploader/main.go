@@ -4,35 +4,23 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"os"
 
 	archive "github.com/shiguredo/sora-archive-uploader"
 )
 
-var (
-	version   string
-	revision  string
-	buildDate string
-
-	versionText = `sora-archive-uploader build info.
-version: %s
-revision: %s
-build date: %s
-`
-)
-
 func main() {
-	configFilePath := flag.String("C", "config.ini", "Config file path")
-	var v bool
-	flag.BoolVar(&v, "version", false, "Show version")
+	// /bin/sora-archive-uploader -V
+	showVersion := flag.Bool("V", false, "バージョン")
+
+	// /bin/sora-archive-uploader -C ./config.ini
+	configFilePath := flag.String("C", "./config.ini", "Config file path")
 	flag.Parse()
 
-	if v {
-		fmt.Printf(versionText, version, revision, buildDate)
-		os.Exit(0)
+	if *showVersion {
+		fmt.Printf("Sora Archive Uploader version %s\n", archive.Version)
+		return
 	}
 
-	log.Printf("sora-archive-uploader version:%s revision:%s build_date:%s", version, revision, buildDate)
 	log.Printf("config file path: %s", *configFilePath)
 	archive.Run(configFilePath)
 }
