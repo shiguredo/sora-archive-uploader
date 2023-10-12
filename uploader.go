@@ -292,7 +292,14 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 		Msg("UPLOAD-METADATA-FILE-SUCCESSFULLY")
 
 	webmObjectKey := fmt.Sprintf("%s/%s", am.RecordingID, webmFilename)
-	fileURL, err := uploadWebMFile(u.ctx, osConfig, webmObjectKey, webmFilepath)
+
+	var fileURL string
+	if u.config.UploadFileRateLimitMbps == 0 {
+		fileURL, err = uploadWebMFile(u.ctx, osConfig, webmObjectKey, webmFilepath)
+	} else {
+		fileURL, err = uploadWebMFileWithRateLimit(u.ctx, osConfig, webmObjectKey, webmFilepath, u.config.UploadFileRateLimitMbps)
+	}
+
 	if err != nil {
 		zlog.Error().
 			Err(err).
