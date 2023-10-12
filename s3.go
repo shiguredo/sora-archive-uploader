@@ -127,7 +127,7 @@ func isFileContinuous(err error) bool {
 }
 
 func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string,
-	rateLimitMpbs float64) (string, error) {
+	limiter *rate.Limiter) (string, error) {
 	var creds *credentials.Credentials
 	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
 		creds = credentials.NewStaticV4(
@@ -159,10 +159,6 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 
 	// Save the file size.
 	fileSize := fileStat.Size()
-
-	// bit を byte にする
-	rateLimitMByteps := rateLimitMpbs / 8
-	limiter := rate.NewLimiter(rate.Limit(rateLimitMByteps*1024*1024), int(rateLimitMByteps*1024*1024))
 
 	// リミッタを適用したReaderを作成
 	rateLimitedFileReader := NewRateLimitedReader(fileReader, limiter)

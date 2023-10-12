@@ -9,6 +9,7 @@ import (
 	"time"
 
 	zlog "github.com/rs/zerolog/log"
+	"golang.org/x/time/rate"
 )
 
 type Main struct {
@@ -62,7 +63,13 @@ func (m *Main) run(ctx context.Context, cancel context.CancelFunc) error {
 	gateKeeper := newGateKeeper(m.config)
 	recordingFileStream := gateKeeper.run(processContext, foundFiles)
 
-	uploaderManager := newUploaderManager()
+	rateLimitMpbs := m.config.UploadFileRateLimitMbps
+	// bit を byte にする
+	rateLimitMByteps := rateLimitMpbs / 8
+	limiter := rate.NewLimiter(rate.Limit(rateLimitMByteps*1024*1024), int(rateLimitMByteps*1024*1024))
+
+	// rate.Limiter は共通
+	uploaderManager := newUploaderManager(limiter)
 	_, err = uploaderManager.run(processContext, m.config, recordingFileStream)
 	if err != nil {
 		processContextCancel()

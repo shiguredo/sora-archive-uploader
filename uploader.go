@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shiguredo/sora-archive-uploader/s3"
 	base32 "github.com/shogo82148/go-clockwork-base32"
+	"golang.org/x/time/rate"
 
 	zlog "github.com/rs/zerolog/log"
 )
@@ -28,6 +29,7 @@ type UploaderManager struct {
 	ArchiveEndStream chan UploaderResult
 	ReportStream     chan UploaderResult
 	uploaders        []Uploader
+	Limiter          *rate.Limiter
 }
 
 type ArchiveMetadata struct {
@@ -52,7 +54,7 @@ type ArchiveEndMetadata struct {
 	Filename     string `json:"filename"`
 }
 
-func newUploaderManager() *UploaderManager {
+func newUploaderManager(limiter *rate.Limiter) *UploaderManager {
 	var uploaders []Uploader
 	archiveStream := make(chan UploaderResult)
 	archiveEndStream := make(chan UploaderResult)
@@ -62,6 +64,7 @@ func newUploaderManager() *UploaderManager {
 		ArchiveEndStream: archiveEndStream,
 		ReportStream:     reportStream,
 		uploaders:        uploaders,
+		Limiter:          limiter,
 	}
 }
 
@@ -71,7 +74,7 @@ func (um *UploaderManager) run(ctx context.Context, config *Config, fileStream <
 		if err != nil {
 			return nil, err
 		}
-		uploader.run(fileStream, um.ArchiveStream, um.ArchiveEndStream, um.ReportStream)
+		uploader.run(fileStream, um.ArchiveStream, um.ArchiveEndStream, um.ReportStream, um.Limiter)
 		um.uploaders = append(um.uploaders, *uploader)
 	}
 	go func() {
@@ -119,6 +122,7 @@ func (u Uploader) run(
 	outArchive chan UploaderResult,
 	outArchiveEnd chan UploaderResult,
 	outReport chan UploaderResult,
+	limiter *rate.Limiter,
 ) {
 	go func() {
 		for {
@@ -166,7 +170,7 @@ func (u Uploader) run(
 						Int("uploader_id", u.id).
 						Str("file_path", inputFilepath).
 						Msg("FOUND-AT-STARTUP")
-					ok := u.handleArchive(inputFilepath, false)
+					ok := u.handleArchive(inputFilepath, false, limiter)
 					select {
 					case <-u.ctx.Done():
 						return
@@ -180,7 +184,7 @@ func (u Uploader) run(
 						Int("uploader_id", u.id).
 						Str("file_path", inputFilepath).
 						Msg("FOUND-AT-STARTUP")
-					ok := u.handleArchive(inputFilepath, true)
+					ok := u.handleArchive(inputFilepath, true, limiter)
 					select {
 					case <-u.ctx.Done():
 						return
@@ -199,7 +203,7 @@ func (u Uploader) Stop() {
 	u.cancel()
 }
 
-func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
+func (u Uploader) handleArchive(archiveJSONFilePath string, split bool, limiter *rate.Limiter) bool {
 	fileInfo, err := os.Stat(archiveJSONFilePath)
 	if err != nil {
 		zlog.Error().
@@ -297,7 +301,7 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 	if u.config.UploadFileRateLimitMbps == 0 {
 		fileURL, err = uploadWebMFile(u.ctx, osConfig, webmObjectKey, webmFilepath)
 	} else {
-		fileURL, err = uploadWebMFileWithRateLimit(u.ctx, osConfig, webmObjectKey, webmFilepath, u.config.UploadFileRateLimitMbps)
+		fileURL, err = uploadWebMFileWithRateLimit(u.ctx, osConfig, webmObjectKey, webmFilepath, limiter)
 	}
 
 	if err != nil {
