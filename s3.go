@@ -189,7 +189,7 @@ func (r *RateLimitedReader) Read(p []byte) (int, error) {
 	}
 
 	// ここで制限をかける
-	err = r.limiter.WaitN(nil, n)
+	err = r.limiter.WaitN(context.TODO(), n)
 	return n, err
 }
 
