@@ -42,6 +42,7 @@ type Config struct {
 
 	UploadWorkers int `ini:"upload_workers"`
 
+	// 1 ファイルあたりのアップロードレート制限
 	UploadFileRateLimitMbps float64 `ini:"upload_file_rate_limit_mbps"`
 
 	UploadedFileCacheSize int `ini:"uploaded_file_cache_size"`
