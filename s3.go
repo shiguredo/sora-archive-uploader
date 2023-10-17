@@ -3,17 +3,19 @@ package archive
 import (
 	"context"
 	"fmt"
-	"io"
+	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
-
-	"golang.org/x/time/rate"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	zlog "github.com/rs/zerolog/log"
 	"github.com/shiguredo/sora-archive-uploader/s3"
+
+	"github.com/conduitio/bwlimit"
 )
 
 func uploadJSONFile(
@@ -34,7 +36,7 @@ func uploadJSONFile(
 		creds = credentials.NewIAM("")
 	}
 
-	s3Client, err := s3.NewClient(osConfig.Endpoint, creds)
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds, nil)
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +80,7 @@ func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage,
 	} else {
 		creds = credentials.NewIAM("")
 	}
-	s3Client, err := s3.NewClient(osConfig.Endpoint, creds)
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds, nil)
 	if err != nil {
 		return "", err
 	}
@@ -127,7 +129,7 @@ func isFileContinuous(err error) bool {
 }
 
 func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string,
-	rateLimitMpbs float64) (string, error) {
+	rateLimitMpbs int) (string, error) {
 	var creds *credentials.Credentials
 	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
 		creds = credentials.NewStaticV4(
@@ -140,7 +142,20 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 	} else {
 		creds = credentials.NewIAM("")
 	}
-	s3Client, err := s3.NewClient(osConfig.Endpoint, creds)
+
+	// bit を byte にする
+	rateLimitMByteps := (bwlimit.Byte(rateLimitMpbs) * bwlimit.MiB) / 8
+
+	// 受信には制限をかけない
+	dialer := bwlimit.NewDialer(&net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}, rateLimitMByteps, 0)
+
+	transport := http.DefaultTransport
+	transport.(*http.Transport).DialContext = dialer.DialContext
+
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds, &transport)
 	if err != nil {
 		return "", err
 	}
@@ -160,42 +175,13 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 	// Save the file size.
 	fileSize := fileStat.Size()
 
-	// bit を byte にする
-	rateLimitMByteps := rateLimitMpbs / 8
-	limiter := rate.NewLimiter(rate.Limit(rateLimitMByteps*1024*1024), int(rateLimitMByteps*1024*1024))
-
-	// リミッタを適用したReaderを作成
-	rateLimitedFileReader := NewRateLimitedReader(fileReader, limiter)
-
-	n, err := s3Client.PutObject(ctx, osConfig.BucketName, dst, rateLimitedFileReader, fileSize,
-		minio.PutObjectOptions{ContentType: "application/octet-stream"})
+	// 制限時にはマルチパートアップロードを行わない
+	n, err := s3Client.PutObject(ctx, osConfig.BucketName, dst, fileReader, fileSize,
+		minio.PutObjectOptions{ContentType: "application/octet-stream", DisableMultipart: true})
 	if err != nil {
 		return "", err
 	}
 
 	objectURL := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
 	return objectURL, nil
-}
-
-type RateLimitedReader struct {
-	reader  io.Reader
-	limiter *rate.Limiter
-}
-
-func (r *RateLimitedReader) Read(p []byte) (int, error) {
-	n, err := r.reader.Read(p)
-	if err != nil {
-		return n, err
-	}
-
-	// ここで制限をかける
-	err = r.limiter.WaitN(context.TODO(), n)
-	return n, err
-}
-
-func NewRateLimitedReader(r io.Reader, l *rate.Limiter) *RateLimitedReader {
-	return &RateLimitedReader{
-		reader:  r,
-		limiter: l,
-	}
 }

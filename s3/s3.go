@@ -1,6 +1,7 @@
 package s3
 
 import (
+	"net/http"
 	"net/url"
 
 	"github.com/minio/minio-go/v7"
@@ -41,12 +42,22 @@ func maybeEndpointURL(endpoint string) (string, bool) {
 	return endpoint, secure
 }
 
-func NewClient(endpoint string, credentials *credentials.Credentials) (*minio.Client, error) {
+func NewClient(endpoint string, credentials *credentials.Credentials, transport *http.RoundTripper) (*minio.Client, error) {
 	newEndpoint, secure := maybeEndpointURL(endpoint)
+	if transport == nil {
+		return minio.New(
+			newEndpoint,
+			&minio.Options{
+				Creds:  credentials,
+				Secure: secure,
+			})
+	}
+
 	return minio.New(
 		newEndpoint,
 		&minio.Options{
-			Creds:  credentials,
-			Secure: secure,
+			Creds:     credentials,
+			Secure:    secure,
+			Transport: *transport,
 		})
 }
