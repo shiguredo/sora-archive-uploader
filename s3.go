@@ -3,27 +3,24 @@ package archive
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-
 	zlog "github.com/rs/zerolog/log"
-)
+	"github.com/shiguredo/sora-archive-uploader/s3"
 
-// config ではなくこちらにまとめる
-type S3CompatibleObjectStorage struct {
-	Endpoint        string
-	AccessKeyID     string
-	SecretAccessKey string
-	BucketName      string
-}
+	"github.com/conduitio/bwlimit"
+)
 
 func uploadJSONFile(
 	ctx context.Context,
-	osConfig *S3CompatibleObjectStorage,
+	osConfig *s3.S3CompatibleObjectStorage,
 	dst, filePath string,
 ) (string, error) {
 	var creds *credentials.Credentials
@@ -39,7 +36,7 @@ func uploadJSONFile(
 		creds = credentials.NewIAM("")
 	}
 
-	s3Client, err := newS3Client(osConfig.Endpoint, creds)
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds, nil)
 	if err != nil {
 		return "", err
 	}
@@ -66,11 +63,11 @@ func uploadJSONFile(
 		fmt.Sprintf("attachment; filename=\"%s\"", filename),
 	)
 
-	objectUrl := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
-	return objectUrl, nil
+	objectURL := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
+	return objectURL, nil
 }
 
-func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, dst, filePath string) (string, error) {
+func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string) (string, error) {
 	var creds *credentials.Credentials
 	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
 		creds = credentials.NewStaticV4(
@@ -83,7 +80,7 @@ func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, ds
 	} else {
 		creds = credentials.NewIAM("")
 	}
-	s3Client, err := newS3Client(osConfig.Endpoint, creds)
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds, nil)
 	if err != nil {
 		return "", err
 	}
@@ -113,8 +110,8 @@ func uploadWebMFile(ctx context.Context, osConfig *S3CompatibleObjectStorage, ds
 		fmt.Sprintf("attachment; filename=\"%s\"", filename),
 	)
 
-	objectUrl := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
-	return objectUrl, nil
+	objectURL := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
+	return objectURL, nil
 }
 
 // minio のエラーをレスポンスに復元して、リトライするためファイルを残すか対象のファイルを削除するか判断する
@@ -131,39 +128,60 @@ func isFileContinuous(err error) bool {
 	return true
 }
 
-func maybeEndpointURL(endpoint string) (string, bool) {
-	// もし endpoint に指定されたのが endpoint_url だった場合、
-	// scheme をチェックして http ならば secure = false にする
-	// さらに host だけを取り出して endpoint として扱う
-	var secure = false
-	u, err := url.Parse(endpoint)
-	// エラーがあっても無視してそのまま文字列として扱う
-	// エラーがないときだけ scheme チェックする
-	if err == nil {
-		switch u.Scheme {
-		case "http":
-			return u.Host, secure
-		case "https":
-			// https なので secure を true にする
-			secure = true
-			return u.Host, secure
-		case "":
-			// scheme なしの場合は secure を true にする
-			secure = true
-			return endpoint, secure
-		default:
-			// サポート外の scheme の場合はタダの文字列として扱う
-		}
+func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string,
+	rateLimitMpbs int) (string, error) {
+	var creds *credentials.Credentials
+	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
+		creds = credentials.NewStaticV4(
+			osConfig.AccessKeyID,
+			osConfig.SecretAccessKey,
+			"",
+		)
+	} else if (len(os.Getenv("AWS_ACCESS_KEY_ID")) > 0) && (len(os.Getenv("AWS_SECRET_ACCESS_KEY")) > 0) {
+		creds = credentials.NewEnvAWS()
+	} else {
+		creds = credentials.NewIAM("")
 	}
-	return endpoint, secure
-}
 
-func newS3Client(endpoint string, credentials *credentials.Credentials) (*minio.Client, error) {
-	newEndpoint, secure := maybeEndpointURL(endpoint)
-	return minio.New(
-		newEndpoint,
-		&minio.Options{
-			Creds:  credentials,
-			Secure: secure,
-		})
+	// bit を byte にする
+	rateLimitMByteps := (bwlimit.Byte(rateLimitMpbs) * bwlimit.MiB) / 8
+
+	// 受信には制限をかけない
+	dialer := bwlimit.NewDialer(&net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}, rateLimitMByteps, 0)
+
+	transport := http.DefaultTransport
+	transport.(*http.Transport).DialContext = dialer.DialContext
+
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds, &transport)
+	if err != nil {
+		return "", err
+	}
+
+	fileReader, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer fileReader.Close()
+
+	// Save the file stat.
+	fileStat, err := fileReader.Stat()
+	if err != nil {
+		return "", err
+	}
+
+	// Save the file size.
+	fileSize := fileStat.Size()
+
+	// 制限時にはマルチパートアップロードを行わない
+	n, err := s3Client.PutObject(ctx, osConfig.BucketName, dst, fileReader, fileSize,
+		minio.PutObjectOptions{ContentType: "application/octet-stream", DisableMultipart: true})
+	if err != nil {
+		return "", err
+	}
+
+	objectURL := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
+	return objectURL, nil
 }

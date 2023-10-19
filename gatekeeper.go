@@ -32,7 +32,7 @@ func (ru *RecordingUnit) run() {
 	zlog.Debug().
 		Str("recording_id", ru.recordingID).
 		Int32("counter", ru.counter).
-		Msgf("RUN-RECORDING-UNIT")
+		Msg("RUN-RECORDING-UNIT")
 }
 
 func (ru *RecordingUnit) done() {
@@ -40,7 +40,7 @@ func (ru *RecordingUnit) done() {
 	zlog.Debug().
 		Str("recording_id", ru.recordingID).
 		Int32("counter", ru.counter).
-		Msgf("DONE-RECORDING-UNIT")
+		Msg("DONE-RECORDING-UNIT")
 }
 
 func (ru *RecordingUnit) canProcessAndSetReportFile(reportFile string) bool {

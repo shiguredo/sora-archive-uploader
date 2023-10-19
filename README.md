@@ -1,7 +1,9 @@
 # Sora Archive Uploader
 
 <!-- [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/shiguredo/sora-archive-uploader.svg)](https://github.com/shiguredo/sora-archive-uploader) -->
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 <!-- [![Actions Status](https://github.com/shiguredo/sora-archive-uploader/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/shiguredo/sora_exporter/actions/workflows/ci.yml) -->
 
 ## About Shiguredo's open source software
@@ -46,17 +48,17 @@ Sora Cloud では出力されたファイルをオブジェクトストレージ
 
 ## まずは使ってみる
 
-config.toml に必要な情報を設定してください。
+config.ini に必要な情報を設定してください。
 
 ```console
-$ cp config.example.com config.toml
+$ cp config_example.ini config.ini
 ```
 
 make でビルドして実行します。
 
 ```console
 $ make
-$ ./bin/sora-archive-uploader-dev -C config.toml
+$ ./bin/sora-archive-uploader-dev -C config.ini
 ```
 
 ## Discord
@@ -71,7 +73,7 @@ https://discord.gg/shiguredo
 
 - オープンソースでの公開が前提
 - 可能であれば企業名の公開
-    - 公開が難しい場合は `企業名非公開` と書かせていただきます
+  - 公開が難しい場合は `企業名非公開` と書かせていただきます
 
 ### 機能
 

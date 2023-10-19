@@ -1,4 +1,4 @@
-package archive
+package s3
 
 import (
 	"testing"

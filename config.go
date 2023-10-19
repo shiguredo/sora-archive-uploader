@@ -1,56 +1,79 @@
 package archive
 
 import (
-	"github.com/BurntSushi/toml"
+	_ "embed"
+
+	"gopkg.in/ini.v1"
+)
+
+//go:embed VERSION
+var Version string
+
+const (
+	DefaultLogDir  = "."
+	DefaultLogName = "sora-archive-uploader.jsonl"
+
+	// megabytes
+	DefaultLogRotateMaxSize    = 200
+	DefaultLogRotateMaxBackups = 7
+	// days
+	DefaultLogRotateMaxAge = 30
 )
 
 type Config struct {
-	Debug bool `toml:"debug"`
+	Debug bool `ini:"debug"`
 
-	LogDir              string `toml:"log_dir"`
-	LogName             string `toml:"log_name"`
-	LogStdOut           bool   `toml:"log_std_out"`
-	LogRotateMaxSize    int    `toml:"log_rotate_max_size"`
-	LogRotateMaxBackups int    `toml:"log_rotate_max_backups"`
-	LogRotateMaxAge     int    `toml:"log_rotate_max_age"`
-	LogRotateCompress   bool   `toml:"log_rotate_compress"`
+	LogDir    string `ini:"log_dir"`
+	LogName   string `ini:"log_name"`
+	LogStdout bool   `ini:"log_stdout"`
 
-	ObjectStorageEndpoint        string `toml:"object_storage_endpoint"`
-	ObjectStorageBucketName      string `toml:"object_storage_bucket_name"`
-	ObjectStorageAccessKeyID     string `toml:"object_storage_access_key_id"`
-	ObjectStorageSecretAccessKey string `toml:"object_storage_secret_access_key"`
+	LogRotateMaxSize    int  `ini:"log_rotate_max_size"`
+	LogRotateMaxBackups int  `ini:"log_rotate_max_backups"`
+	LogRotateMaxAge     int  `ini:"log_rotate_max_age"`
+	LogRotateCompress   bool `ini:"log_rotate_compress"`
 
-	SoraArchiveDirFullPath  string `toml:"archive_dir_full_path"`
-	SoraEvacuateDirFullPath string `toml:"evacuate_dir_full_path"`
+	ObjectStorageEndpoint        string `ini:"object_storage_endpoint"`
+	ObjectStorageBucketName      string `ini:"object_storage_bucket_name"`
+	ObjectStorageAccessKeyID     string `ini:"object_storage_access_key_id"`
+	ObjectStorageSecretAccessKey string `ini:"object_storage_secret_access_key"`
 
-	UploadWorkers int `toml:"upload_workers"`
+	SoraArchiveDirFullPath  string `ini:"archive_dir_full_path"`
+	SoraEvacuateDirFullPath string `ini:"evacuate_dir_full_path"`
 
-	UploadedFileCacheSize int `toml:"uploaded_file_cache_size"`
+	UploadWorkers int `ini:"upload_workers"`
 
-	WebhookEndpointURL            string `toml:"webhook_endpoint_url"`
-	WebhookEndpointHealthCheckURL string `toml:"webhook_endpoint_health_check_url"`
+	// 1 ファイルあたりのアップロードレート制限
+	UploadFileRateLimitMbps int `ini:"upload_file_rate_limit_mbps"`
 
-	WebhookTypeHeaderName              string `toml:"webhook_type_header_name"`
-	WebhookTypeArchiveUploaded         string `toml:"webhook_type_archive_uploaded"`
-	WebhookTypeSplitArchiveUploaded    string `toml:"webhook_type_split_archive_uploaded"`
-	WebhookTypeSplitArchiveEndUploaded string `toml:"webhook_type_split_archive_end_uploaded"`
-	WebhookTypeReportUploaded          string `toml:"webhook_type_report_uploaded"`
+	UploadedFileCacheSize int `ini:"uploaded_file_cache_size"`
 
-	WebhookBasicAuthUsername string `toml:"webhook_basic_auth_username"`
-	WebhookBasicAuthPassword string `toml:"webhook_basic_auth_password"`
+	WebhookEndpointURL            string `ini:"webhook_endpoint_url"`
+	WebhookEndpointHealthCheckURL string `ini:"webhook_endpoint_health_check_url"`
 
-	WebhookRequestTimeoutS int32 `toml:"webhook_request_timeout_s"`
+	WebhookTypeHeaderName              string `ini:"webhook_type_header_name"`
+	WebhookTypeArchiveUploaded         string `ini:"webhook_type_archive_uploaded"`
+	WebhookTypeSplitArchiveUploaded    string `ini:"webhook_type_split_archive_uploaded"`
+	WebhookTypeSplitArchiveEndUploaded string `ini:"webhook_type_split_archive_end_uploaded"`
+	WebhookTypeReportUploaded          string `ini:"webhook_type_report_uploaded"`
 
-	WebhookTlsVerifyCacertPath string `toml:"webhook_tls_verify_cacert_path"`
-	WebhookTlsFullchainPath    string `toml:"webhook_tls_fullchain_path"`
-	WebhookTlsPrivkeyPath      string `toml:"webhook_tls_privkey_path"`
+	WebhookBasicAuthUsername string `ini:"webhook_basic_auth_username"`
+	WebhookBasicAuthPassword string `ini:"webhook_basic_auth_password"`
+
+	WebhookRequestTimeoutS int32 `ini:"webhook_request_timeout_s"`
+
+	WebhookTLSVerifyCacertPath string `ini:"webhook_tls_verify_cacert_path"`
+	WebhookTLSFullchainPath    string `ini:"webhook_tls_fullchain_path"`
+	WebhookTLSPrivkeyPath      string `ini:"webhook_tls_privkey_path"`
 }
 
-func initConfig(data []byte, config interface{}) error {
-	if err := toml.Unmarshal(data, config); err != nil {
-		return err
+func newConfig(configFilePath string) (*Config, error) {
+	config := new(Config)
+	iniConfig, err := ini.InsensitiveLoad(configFilePath)
+	if err != nil {
+		return nil, err
 	}
-
-	// TODO: 初期値
-	return nil
+	if err := iniConfig.StrictMapTo(config); err != nil {
+		return nil, err
+	}
+	return config, nil
 }
