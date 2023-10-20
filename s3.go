@@ -85,7 +85,7 @@ func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage,
 		return "", err
 	}
 
-	zlog.Debug().
+	zlog.Info().
 		Str("dst", dst).
 		Msg("WEB-UPLOAD-START")
 	n, err := s3Client.FPutObject(ctx,
@@ -95,7 +95,7 @@ func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage,
 	if err != nil {
 		return "", err
 	}
-	zlog.Debug().
+	zlog.Info().
 		Str("dst", dst).
 		Int64("size", n.Size).
 		Msg("UPLOAD-WEBM-SUCCESSFULLY")
@@ -175,7 +175,7 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 	// Save the file size.
 	fileSize := fileStat.Size()
 
-	zlog.Debug().
+	zlog.Info().
 		Str("dst", dst).
 		Msg("WEB-UPLOAD-START")
 
@@ -186,7 +186,7 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 		return "", err
 	}
 
-	zlog.Debug().
+	zlog.Info().
 		Str("dst", dst).
 		Int64("size", n.Size).
 		Msg("UPLOAD-WEBM-SUCCESSFULLY")
