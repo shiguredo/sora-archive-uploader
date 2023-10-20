@@ -265,6 +265,10 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 	}
 	defer f.Close()
 
+	zlog.Info().
+		Str("path", webmFilepath).
+		Msg("WEBM-FILE-PATH")
+
 	metadataFileURL, err := uploadJSONFile(
 		u.ctx,
 		osConfig,
