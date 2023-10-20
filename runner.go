@@ -23,7 +23,7 @@ func newMain(config *Config) *Main {
 
 func (m *Main) run(ctx context.Context, cancel context.CancelFunc) error {
 	var archiveDir = m.config.SoraArchiveDirFullPath
-	zlog.Info().Str("path", archiveDir).Msg("WATCHING-ROOT-DIR")
+	zlog.Debug().Str("path", archiveDir).Msg("WATCHING-ROOT-DIR")
 	fileInfo, err := os.Stat(archiveDir)
 	if err != nil {
 		// 対象のディレクトリが存在しなければ終わる
@@ -54,7 +54,7 @@ func (m *Main) run(ctx context.Context, cancel context.CancelFunc) error {
 	if len(foundFiles) == 0 {
 		// 処理対象のファイルが見つからなかったので終わる
 		cancel()
-		zlog.Info().Msg("ARCHIVE-FILE-NOT-FOUND")
+		zlog.Debug().Msg("ARCHIVE-FILE-NOT-FOUND")
 		return nil
 	}
 
@@ -151,7 +151,7 @@ func Run(configFilePath *string) {
 		resp.Body.Close()
 	}
 
-	zlog.Info().Msg("STARTED-SORA-ARCHIVE-UPLOADER")
+	zlog.Debug().Msg("STARTED-SORA-ARCHIVE-UPLOADER")
 
 	// シグナルをキャッチして停止処理
 	trapSignals := []os.Signal{
@@ -182,5 +182,5 @@ func Run(configFilePath *string) {
 		}()
 	}
 	<-doneShutdown
-	zlog.Info().Msg("STOPPED-SORA-ARCHIVE-UPLOADER")
+	zlog.Debug().Msg("STOPPED-SORA-ARCHIVE-UPLOADER")
 }
