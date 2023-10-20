@@ -175,12 +175,21 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 	// Save the file size.
 	fileSize := fileStat.Size()
 
+	zlog.Debug().
+		Str("dst", dst).
+		Msg("WEB-UPLOAD-START")
+
 	// 制限時にはマルチパートアップロードを行わない
 	n, err := s3Client.PutObject(ctx, osConfig.BucketName, dst, fileReader, fileSize,
 		minio.PutObjectOptions{ContentType: "application/octet-stream", DisableMultipart: true})
 	if err != nil {
 		return "", err
 	}
+
+	zlog.Debug().
+		Str("dst", dst).
+		Int64("size", n.Size).
+		Msg("UPLOAD-WEBM-SUCCESSFULLY")
 
 	objectURL := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
 	return objectURL, nil
