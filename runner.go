@@ -151,11 +151,6 @@ func Run(configFilePath *string) {
 		resp.Body.Close()
 	}
 
-	// 指定は 0 (制限なし) または 10 Mbps 以上
-	if (config.UploadFileRateLimitMbps > 0) && (config.UploadFileRateLimitMbps < 10) {
-		zlog.Fatal().Msg("UPLOAD-FILE-RATE-LIMIT-MBPS-ERROR")
-	}
-
 	zlog.Info().Msg("STARTED-SORA-ARCHIVE-UPLOADER")
 
 	// シグナルをキャッチして停止処理
