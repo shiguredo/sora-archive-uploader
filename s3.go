@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -36,7 +35,7 @@ func uploadJSONFile(
 		creds = credentials.NewIAM("")
 	}
 
-	s3Client, err := s3.NewClient(osConfig.Endpoint, creds, nil)
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds)
 	if err != nil {
 		return "", err
 	}
@@ -80,7 +79,7 @@ func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage,
 	} else {
 		creds = credentials.NewIAM("")
 	}
-	s3Client, err := s3.NewClient(osConfig.Endpoint, creds, nil)
+	s3Client, err := s3.NewClient(osConfig.Endpoint, creds)
 	if err != nil {
 		return "", err
 	}
@@ -152,10 +151,13 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 		KeepAlive: 30 * time.Second,
 	}, rateLimitMByteps, 0)
 
-	transport := http.DefaultTransport
-	transport.(*http.Transport).DialContext = dialer.DialContext
+	transport, err := s3.DefaultTransport(osConfig.Endpoint)
+	if err != nil {
+		return "", err
+	}
+	transport.DialContext = dialer.DialContext
 
-	s3Client, err := s3.NewClient(osConfig.Endpoint, creds, &transport)
+	s3Client, err := s3.NewClientWithTransport(osConfig.Endpoint, creds, transport)
 	if err != nil {
 		return "", err
 	}
