@@ -1,0 +1,21 @@
+[Unit]
+Description=Sora Archive Uploader Service
+RefuseManualStart=no
+RefuseManualStop=yes
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=sora
+Group=sora
+PermissionsStartOnly=true
+Restart=no
+
+WorkingDirectory=/home/sora/sora-archive-uploader
+ExecStartPre=/bin/mkdir -p /var/log/sora-archive-uploader
+ExecStartPre=/bin/chown -R sora:sora /var/log/sora-archive-uploader
+
+ExecStart=/home/sora/sora-archive-uploader/bin/sora-archive-uploader -C /home/sora/sora-archive-uploader/config.ini
+
+[Install]
+WantedBy=multi-user.target
