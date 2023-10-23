@@ -58,7 +58,7 @@ make でビルドして実行します。
 
 ```console
 $ make
-$ ./bin/sora-archive-uploader-dev -C config.ini
+$ ./bin/sora-archive-uploader -C config.ini
 ```
 
 ## Discord
