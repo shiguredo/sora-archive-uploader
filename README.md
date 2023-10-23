@@ -35,6 +35,7 @@ Sora Cloud では出力されたファイルをオブジェクトストレージ
 - アップロード完了時に指定された URL にウェブフックリクエストを通知します
 - ウェブフックにはベーシック認証や mTLS が利用可能です
 - アップロードに失敗した場合は設定ファイルで指定した隔離ディレクトリに移動します
+- アップロードの帯域制限を設定できます
 
 ### 対応オブジェクトストレージ
 
@@ -50,15 +51,15 @@ Sora Cloud では出力されたファイルをオブジェクトストレージ
 
 config.ini に必要な情報を設定してください。
 
-```console
+```bash
 $ cp config_example.ini config.ini
 ```
 
 make でビルドして実行します。
 
-```console
+```bash
 $ make
-$ ./bin/sora-archive-uploader-dev -C config.ini
+$ ./bin/sora-archive-uploader -C config.ini
 ```
 
 ## Discord
