@@ -42,22 +42,26 @@ func maybeEndpointURL(endpoint string) (string, bool) {
 	return endpoint, secure
 }
 
-func NewClient(endpoint string, credentials *credentials.Credentials, transport *http.RoundTripper) (*minio.Client, error) {
-	newEndpoint, secure := maybeEndpointURL(endpoint)
-	if transport == nil {
-		return minio.New(
-			newEndpoint,
-			&minio.Options{
-				Creds:  credentials,
-				Secure: secure,
-			})
+func NewClient(endpoint string, credentials *credentials.Credentials) (*minio.Client, error) {
+	transport, err := DefaultTransport(endpoint)
+	if err != nil {
+		return nil, err
 	}
+	return NewClientWithTransport(endpoint, credentials, transport)
+}
 
+func NewClientWithTransport(endpoint string, credentials *credentials.Credentials, transport http.RoundTripper) (*minio.Client, error) {
+	newEndpoint, secure := maybeEndpointURL(endpoint)
 	return minio.New(
 		newEndpoint,
 		&minio.Options{
 			Creds:     credentials,
 			Secure:    secure,
-			Transport: *transport,
+			Transport: transport,
 		})
+}
+
+func DefaultTransport(endpoint string) (*http.Transport, error) {
+	_, secure := maybeEndpointURL(endpoint)
+	return minio.DefaultTransport(secure)
 }
