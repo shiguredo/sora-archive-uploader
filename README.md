@@ -51,13 +51,13 @@ Sora Cloud では出力されたファイルをオブジェクトストレージ
 
 config.ini に必要な情報を設定してください。
 
-```console
+```bash
 $ cp config_example.ini config.ini
 ```
 
 make でビルドして実行します。
 
-```console
+```bash
 $ make
 $ ./bin/sora-archive-uploader -C config.ini
 ```
