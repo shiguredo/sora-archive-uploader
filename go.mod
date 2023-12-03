@@ -5,7 +5,7 @@ go 1.21.4
 require (
 	github.com/conduitio/bwlimit v0.1.0
 	github.com/google/uuid v1.4.0
-	github.com/minio/minio-go/v7 v7.0.64
+	github.com/minio/minio-go/v7 v7.0.65
 	github.com/rs/zerolog v1.31.0
 	github.com/shogo82148/go-clockwork-base32 v1.1.0
 	github.com/stretchr/testify v1.8.4
