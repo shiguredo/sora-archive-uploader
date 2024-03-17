@@ -1,11 +1,11 @@
 module github.com/shiguredo/sora-archive-uploader
 
-go 1.22.0
+go 1.22.1
 
 require (
 	github.com/conduitio/bwlimit v0.1.0
 	github.com/google/uuid v1.6.0
-	github.com/minio/minio-go/v7 v7.0.68
+	github.com/minio/minio-go/v7 v7.0.69
 	github.com/rs/zerolog v1.32.0
 	github.com/shogo82148/go-clockwork-base32 v1.1.0
 	github.com/stretchr/testify v1.9.0
