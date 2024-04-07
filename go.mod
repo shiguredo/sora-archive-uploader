@@ -1,6 +1,6 @@
 module github.com/shiguredo/sora-archive-uploader
 
-go 1.22.1
+go 1.22.2
 
 require (
 	github.com/conduitio/bwlimit v0.1.0
