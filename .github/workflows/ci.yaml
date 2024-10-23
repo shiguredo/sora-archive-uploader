@@ -16,8 +16,6 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version-file: ./go.mod
-          cache: true
-          cache-dependency-path: ./go.sum
       - run: go version
       - run: go fmt .
       - uses: dominikh/staticcheck-action@v1

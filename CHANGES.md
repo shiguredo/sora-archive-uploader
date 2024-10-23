@@ -11,6 +11,8 @@
 
 ## develop
 
+- [UPDATE] CI の staticcheck を 2024.1.1 にアップデート
+  - @voluntas
 - [UPDATE] go 1.23.2 にアップデート
   - @voluntas
 
