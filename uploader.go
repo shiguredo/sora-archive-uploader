@@ -17,10 +17,11 @@ import (
 )
 
 type RecordingReport struct {
-	RecordingID string `json:"recording_id"`
-	ChannelID   string `json:"channel_id"`
-	FilePath    string `json:"file_path"`
-	Filename    string `json:"filename"`
+	RecordingID       string          `json:"recording_id"`
+	ChannelID         string          `json:"channel_id"`
+	FilePath          string          `json:"file_path"`
+	Filename          string          `json:"filename"`
+	RecordingMetadata json.RawMessage `json:"recording_metadata"`
 }
 
 type UploaderManager struct {
@@ -459,13 +460,14 @@ func (u Uploader) handleReport(reportJSONFilePath string) bool {
 			return false
 		}
 		var w = WebhookReportUploaded{
-			ID:          webhookID,
-			Type:        u.config.WebhookTypeReportUploaded,
-			Timestamp:   time.Now().UTC(),
-			RecordingID: rr.RecordingID,
-			ChannelID:   rr.ChannelID,
-			Filename:    filename,
-			FileURL:     fileURL,
+			ID:                webhookID,
+			Type:              u.config.WebhookTypeReportUploaded,
+			Timestamp:         time.Now().UTC(),
+			RecordingID:       rr.RecordingID,
+			ChannelID:         rr.ChannelID,
+			Filename:          filename,
+			FileURL:           fileURL,
+			RecordingMetadata: rr.RecordingMetadata,
 		}
 		buf, err := json.Marshal(w)
 		if err != nil {
