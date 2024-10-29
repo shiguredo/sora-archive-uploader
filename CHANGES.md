@@ -13,6 +13,7 @@
 
 - [UPDATE] report ファイルアップロード後のウェブフックに `recording_metadata` を追加する
   - アップロードした report ファイルの `recording_metadata` の内容をウェブフックに含めて送信する
+  - report ファイルに `recording_metadata` のキーが存在しない場合にはウェブフックにも `recording_metadata` を含めない
   - @tnamao
 - [UPDATE] CI の staticcheck を 2024.1.1 にアップデート
   - @voluntas
