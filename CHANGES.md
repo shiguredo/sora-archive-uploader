@@ -11,6 +11,9 @@
 
 ## develop
 
+- [UPDATE] report ファイルアップロード後のウェブフックに `recording_metadata` を追加する
+  - アップロードした report ファイルの `recording_metadata` の内容をウェブフックに含めて送信する
+  - @tnamao
 - [UPDATE] CI の staticcheck を 2024.1.1 にアップデート
   - @voluntas
 - [UPDATE] go 1.23.2 にアップデート
