@@ -17,10 +17,13 @@ import (
 )
 
 type RecordingReport struct {
-	RecordingID string `json:"recording_id"`
-	ChannelID   string `json:"channel_id"`
-	FilePath    string `json:"file_path"`
-	Filename    string `json:"filename"`
+	RecordingID       string          `json:"recording_id"`
+	ChannelID         string          `json:"channel_id"`
+	SessionID         string          `json:"session_id"`
+	FilePath          string          `json:"file_path"`
+	Filename          string          `json:"filename"`
+	Metadata          json.RawMessage `json:"metadata"`
+	RecordingMetadata json.RawMessage `json:"recording_metadata"`
 }
 
 type UploaderManager struct {
@@ -467,6 +470,15 @@ func (u Uploader) handleReport(reportJSONFilePath string) bool {
 			Filename:    filename,
 			FileURL:     fileURL,
 		}
+
+		// セッション録画とレガシー録画では、録画の metadata のキーが異なるための分岐
+		// SessionID が空でなければセッション録画とみなす
+		if rr.SessionID != "" {
+			w.RecordingMetadata = rr.RecordingMetadata
+		} else {
+			w.RecordingMetadata = rr.Metadata
+		}
+
 		buf, err := json.Marshal(w)
 		if err != nil {
 			zlog.Error().

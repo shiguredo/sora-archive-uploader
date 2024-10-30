@@ -11,6 +11,13 @@
 
 ## develop
 
+- [UPDATE] report ファイルアップロード後のウェブフックに `recording_metadata` を追加する
+  - アップロードした report ファイルの `recording_metadata` または `metadata` の内容をウェブフックの `recording_metadata` に含めて送信する
+    - セッション録画の場合は `recording_metadata` の値を使用する
+    - レガシー録画の場合は `metadata` の値を使用する
+    - ウェブフックに含める際のキーはセッション録画でもレガシー録画でも共通で `recording_metadata` に設定する
+  - report ファイルに `recording_metadata` または `metadata` のキーが存在しない場合にはウェブフックにも `recording_metadata` を含めない
+  - @tnamao
 - [UPDATE] CI の staticcheck を 2024.1.1 にアップデート
   - @voluntas
 - [UPDATE] go 1.23.2 にアップデート
