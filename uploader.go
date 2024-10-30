@@ -471,12 +471,15 @@ func (u Uploader) handleReport(reportJSONFilePath string) bool {
 			FileURL:     fileURL,
 		}
 
-		// セッション録画とレガシー録画では、録画の metadata のキーが異なるための分岐
-		// SessionID が空でなければセッション録画とみなす
-		if rr.SessionID != "" {
-			w.RecordingMetadata = rr.RecordingMetadata
-		} else {
-			w.RecordingMetadata = rr.Metadata
+		// recording_metadata の除外設定が *無効* の時は recording_metadata をウェブフックに含める
+		if !u.config.ExcludeWebhookRecordingMetadata {
+			// セッション録画とレガシー録画では、録画の metadata のキーが異なるための分岐
+			// SessionID が空でなければセッション録画とみなす
+			if rr.SessionID != "" {
+				w.RecordingMetadata = rr.RecordingMetadata
+			} else {
+				w.RecordingMetadata = rr.Metadata
+			}
 		}
 
 		buf, err := json.Marshal(w)
