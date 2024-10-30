@@ -11,6 +11,10 @@
 
 ## develop
 
+- [UPDATE] 設定に `exclude_webhook_recording_metadata` を追加し、report ファイルアップロード後のウェブフックに `recording_metadata` を含めるかどうか設定できるようにする
+  - デフォルトは `false` で `recording_metadata` を送信するウェブフックに含める
+  - `true` を設定するとレポートファイルに `recording_metadata` または `metadata` が含まれていてもウェブフックには含めない
+  - @tnamao
 - [UPDATE] report ファイルアップロード後のウェブフックに `recording_metadata` を追加する
   - アップロードした report ファイルの `recording_metadata` または `metadata` の内容をウェブフックの `recording_metadata` に含めて送信する
     - セッション録画の場合は `recording_metadata` の値を使用する
