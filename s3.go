@@ -181,9 +181,10 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 		Str("dst", dst).
 		Msg("WEB-UPLOAD-START")
 
-	// 制限時にはマルチパートアップロードを行わない
+	// 使用帯域の制限時は、巨大なサイズのファイルのアップロードする時に使用される multipart アップロードで
+	// 並列アップロードは行わずに 1 thread で処理されるようにオプションを設定する
 	n, err := s3Client.PutObject(ctx, osConfig.BucketName, dst, fileReader, fileSize,
-		minio.PutObjectOptions{ContentType: "application/octet-stream", DisableMultipart: true})
+		minio.PutObjectOptions{ContentType: "application/octet-stream", NumThreads: 1})
 	if err != nil {
 		return "", err
 	}
