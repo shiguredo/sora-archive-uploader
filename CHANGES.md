@@ -22,6 +22,11 @@
     - ウェブフックに含める際のキーはセッション録画でもレガシー録画でも共通で `recording_metadata` に設定する
   - report ファイルに `recording_metadata` または `metadata` のキーが存在しない場合にはウェブフックにも `recording_metadata` を含めない
   - @tnamao
+
+### misc
+
+- [CHANGE] GitHub Actions の ubuntu-latest を ubuntu-24.04 に変更
+  - @voluntas
 - [UPDATE] CI の staticcheck を 2024.1.1 にアップデート
   - @voluntas
 - [UPDATE] go 1.23.2 にアップデート
