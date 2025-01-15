@@ -11,6 +11,9 @@
 
 ## develop
 
+- [UPDATE] 設定に `exclude_webhook_recording_metadata` を追加し、report ファイルアップロード後のウェブフックに `recording_metadata` を含めるかどうか設定できるようにする
+  - デフォルトは `false` で `recording_metadata` を送信するウェブフックに含める
+  - `true` を設定するとレポートファイルに `recording_metadata` または `metadata` が含まれていてもウェブフックには含めない
 - [FIX] ウェブフック送信時の Response.Body のクローズ漏れを修正する
   - @tnamao
 - [FIX] 5GB を超えるファイルのアップロード時に帯域制限がかかるように修正する
