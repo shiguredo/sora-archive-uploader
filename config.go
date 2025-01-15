@@ -79,3 +79,7 @@ func newConfig(configFilePath string) (*Config, error) {
 	}
 	return config, nil
 }
+
+func (c Config) IncludeWebhookRecordingMetadata() bool {
+	return !c.ExcludeWebhookRecordingMetadata
+}
