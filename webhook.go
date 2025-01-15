@@ -126,6 +126,8 @@ func (u Uploader) httpClientDo(client *http.Client, webhookType string, buf []by
 	if err != nil {
 		return err
 	}
+
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("status_code: %d", resp.StatusCode)
 	}
