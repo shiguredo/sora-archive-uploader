@@ -86,7 +86,7 @@ func uploadMediaFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage
 
 	zlog.Info().
 		Str("dst", dst).
-		Msg("WEB-UPLOAD-START")
+		Msg("MEDIA-FILE-UPLOAD-START")
 	n, err := s3Client.FPutObject(ctx,
 		osConfig.BucketName, dst, filePath,
 		minio.PutObjectOptions{ContentType: "application/octet-stream"},
