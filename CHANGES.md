@@ -11,6 +11,9 @@
 
 ## develop
 
+- [CHANGE] アップロードする録画データのファイルを `.webm` だけではなく `.mp4` のスクレイピングにも対応する
+  - ログのメッセージや出力する際のパラメータ名、プログラム中の変数名や関数名も webm を使用している箇所は media に変更する
+  - @tnamao
 - [UPDATE] 設定に `exclude_webhook_recording_metadata` を追加し、report ファイルアップロード後のウェブフックに `recording_metadata` を含めるかどうか設定できるようにする
   - デフォルトは `false` で `recording_metadata` を送信するウェブフックに含める
   - `true` を設定するとレポートファイルに `recording_metadata` または `metadata` が含まれていてもウェブフックには含めない
