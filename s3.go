@@ -66,7 +66,7 @@ func uploadJSONFile(
 	return objectURL, nil
 }
 
-func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string) (string, error) {
+func uploadMediaFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string) (string, error) {
 	var creds *credentials.Credentials
 	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
 		creds = credentials.NewStaticV4(
@@ -97,7 +97,7 @@ func uploadWebMFile(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage,
 	zlog.Info().
 		Str("dst", dst).
 		Int64("size", n.Size).
-		Msg("UPLOAD-WEBM-SUCCESSFULLY")
+		Msg("UPLOAD-MEDIA-FILE-SUCCESSFULLY")
 
 	reqParams := make(url.Values)
 	filename := filepath.Base(dst)
@@ -127,7 +127,7 @@ func isFileContinuous(err error) bool {
 	return true
 }
 
-func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string,
+func uploadMediaFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleObjectStorage, dst, filePath string,
 	rateLimitMpbs int) (string, error) {
 	var creds *credentials.Credentials
 	if (osConfig.AccessKeyID != "") || (osConfig.SecretAccessKey != "") {
@@ -179,7 +179,7 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 
 	zlog.Info().
 		Str("dst", dst).
-		Msg("WEB-UPLOAD-START")
+		Msg("MEDIA-FILE-UPLOAD-START")
 
 	// 使用帯域の制限時は、巨大なサイズのファイルのアップロードする時に使用される multipart アップロードで
 	// 並列アップロードは行わずに 1 thread で処理されるようにオプションを設定する
@@ -192,7 +192,7 @@ func uploadWebMFileWithRateLimit(ctx context.Context, osConfig *s3.S3CompatibleO
 	zlog.Info().
 		Str("dst", dst).
 		Int64("size", n.Size).
-		Msg("UPLOAD-WEBM-SUCCESSFULLY")
+		Msg("UPLOAD-MEDIA-FILE-SUCCESSFULLY")
 
 	objectURL := fmt.Sprintf("s3://%s/%s", n.Bucket, n.Key)
 	return objectURL, nil
