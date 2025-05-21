@@ -314,7 +314,7 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 			Str("path", archiveJSONFilePath).
 			Str("media_filename", mediaFilename).
 			Str("media_object_key", mediaObjectKey).
-			Msg("WEBM-FILE-UPLOAD-ERROR")
+			Msg("MEDIA-FILE-UPLOAD-ERROR")
 		if !isFileContinuous(err) {
 			// リトライしないエラーの場合は、ファイルを削除
 			u.removeArchiveJSONFile(archiveJSONFilePath, mediaFilepath)
