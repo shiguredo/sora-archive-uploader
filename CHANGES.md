@@ -11,6 +11,9 @@
 
 ## develop
 
+- [CHANGE] 設定ファイルの `uploaded_file_cache_size` は使用していないので定義を削除する
+  - @tnamao
+
 ## 2025.1.0
 
 - [CHANGE] アップロードする録画データのファイルを `.webm` だけではなく `.mp4` のスクレイピングにも対応する

@@ -45,8 +45,6 @@ type Config struct {
 	// 1 ファイルあたりのアップロードレート制限
 	UploadFileRateLimitMbps int `ini:"upload_file_rate_limit_mbps"`
 
-	UploadedFileCacheSize int `ini:"uploaded_file_cache_size"`
-
 	WebhookEndpointURL            string `ini:"webhook_endpoint_url"`
 	WebhookEndpointHealthCheckURL string `ini:"webhook_endpoint_health_check_url"`
 
