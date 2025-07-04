@@ -41,11 +41,7 @@
   - @voluntas
 - [UPDATE] CI の staticcheck を 2025.1.1 にアップデート
   - @tnamao
-- [UPDATE] go 1.24.3 にアップデート
-  - @tnamao
-- [UPDATE] 依存ライブラリを更新
-  - `minio/minio-go` 7.0.79 => 7.0.92
-  - `rs/zerolog` 1.33.0 => 1.34.0
+- [UPDATE] go 1.24.4 にアップデート
   - @tnamao
 
 ## 2023.1.0
