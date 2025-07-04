@@ -17,10 +17,13 @@ import (
 )
 
 type RecordingReport struct {
-	RecordingID string `json:"recording_id"`
-	ChannelID   string `json:"channel_id"`
-	FilePath    string `json:"file_path"`
-	Filename    string `json:"filename"`
+	RecordingID       string          `json:"recording_id"`
+	ChannelID         string          `json:"channel_id"`
+	SessionID         string          `json:"session_id"`
+	FilePath          string          `json:"file_path"`
+	Filename          string          `json:"filename"`
+	Metadata          json.RawMessage `json:"metadata"`
+	RecordingMetadata json.RawMessage `json:"recording_metadata"`
 }
 
 type UploaderManager struct {
@@ -238,9 +241,9 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 		Str("connection_id", am.ConnectionID).
 		Msg("ARCHIVE-METADATA-INFO")
 
-	// webm ファイルのパスを作っておく
-	webmFilename := filepath.Base(am.Filename)
-	webmFilepath := filepath.Join(filepath.Dir(archiveJSONFilePath), webmFilename)
+	// メディアファイルのパスを作っておく
+	mediaFilename := filepath.Base(am.Filename)
+	mediaFilepath := filepath.Join(filepath.Dir(archiveJSONFilePath), mediaFilename)
 
 	// metadata ファイル (json) をアップロード
 	metadataFilename := fileInfo.Name()
@@ -252,22 +255,22 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 		SecretAccessKey: u.config.ObjectStorageSecretAccessKey,
 	}
 
-	// webm ファイルを開いておく
-	f, err := os.Open(webmFilepath)
+	// メディアファイルを開いておく
+	f, err := os.Open(mediaFilepath)
 	if err != nil {
 		zlog.Error().
 			Err(err).
 			Int("uploader_id", u.id).
 			Str("path", archiveJSONFilePath).
-			Str("webm_filename", am.FilePath).
-			Msg("WEBM-FILE-OPEN-ERROR")
+			Str("media_filename", am.FilePath).
+			Msg("MEDIA-FILE-OPEN-ERROR")
 		return false
 	}
 	defer f.Close()
 
 	zlog.Info().
-		Str("path", webmFilepath).
-		Msg("WEBM-FILE-PATH")
+		Str("path", mediaFilepath).
+		Msg("MEDIA-FILE-PATH")
 
 	metadataFileURL, err := uploadJSONFile(
 		u.ctx,
@@ -285,8 +288,8 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 			Msg("METADATA-FILE-UPLOAD-ERROR")
 		if !isFileContinuous(err) {
 			// リトライしないエラーの場合は、ファイルを削除
-			u.removeArchiveJSONFile(archiveJSONFilePath, webmFilepath)
-			u.removeArchiveWEBMFile(archiveJSONFilePath, webmFilepath)
+			u.removeArchiveJSONFile(archiveJSONFilePath, mediaFilepath)
+			u.removeArchiveMediaFile(archiveJSONFilePath, mediaFilepath)
 		}
 		return false
 	}
@@ -295,13 +298,13 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 		Str("uploaded_matadata", am.MetadataFilename).
 		Msg("UPLOAD-METADATA-FILE-SUCCESSFULLY")
 
-	webmObjectKey := fmt.Sprintf("%s/%s", am.RecordingID, webmFilename)
+	mediaObjectKey := fmt.Sprintf("%s/%s", am.RecordingID, mediaFilename)
 
 	var fileURL string
 	if u.config.UploadFileRateLimitMbps == 0 {
-		fileURL, err = uploadWebMFile(u.ctx, osConfig, webmObjectKey, webmFilepath)
+		fileURL, err = uploadMediaFile(u.ctx, osConfig, mediaObjectKey, mediaFilepath)
 	} else {
-		fileURL, err = uploadWebMFileWithRateLimit(u.ctx, osConfig, webmObjectKey, webmFilepath, u.config.UploadFileRateLimitMbps)
+		fileURL, err = uploadMediaFileWithRateLimit(u.ctx, osConfig, mediaObjectKey, mediaFilepath, u.config.UploadFileRateLimitMbps)
 	}
 
 	if err != nil {
@@ -309,20 +312,20 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 			Err(err).
 			Int("uploader_id", u.id).
 			Str("path", archiveJSONFilePath).
-			Str("webm_filename", webmFilename).
-			Str("webm_object_key", webmObjectKey).
-			Msg("WEBM-FILE-UPLOAD-ERROR")
+			Str("media_filename", mediaFilename).
+			Str("media_object_key", mediaObjectKey).
+			Msg("MEDIA-FILE-UPLOAD-ERROR")
 		if !isFileContinuous(err) {
 			// リトライしないエラーの場合は、ファイルを削除
-			u.removeArchiveJSONFile(archiveJSONFilePath, webmFilepath)
-			u.removeArchiveWEBMFile(archiveJSONFilePath, webmFilepath)
+			u.removeArchiveJSONFile(archiveJSONFilePath, mediaFilepath)
+			u.removeArchiveMediaFile(archiveJSONFilePath, mediaFilepath)
 		}
 		return false
 	}
 	zlog.Debug().
 		Int("uploader_id", u.id).
-		Str("uploaded_webm", am.Filename).
-		Msg("UPLOAD-WEBM-FILE-SUCCESSFULLY")
+		Str("uploaded_media_file", am.Filename).
+		Msg("UPLOAD-MEDIA-FILE-SUCCESSFULLY")
 
 	if u.config.WebhookEndpointURL != "" {
 		var archiveUploadedType string
@@ -336,7 +339,7 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 			zlog.Error().
 				Err(err).
 				Int("uploader_id", u.id).
-				Str("uploaded_webm", am.Filename).
+				Str("uploaded_media_file", am.Filename).
 				Msg("WEBHOOK-ID-GENERATE-ERROR")
 			return false
 		}
@@ -349,7 +352,7 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 			RecordingID:      am.RecordingID,
 			ChannelID:        am.ChannelID,
 			ConnectionID:     am.ConnectionID,
-			Filename:         webmFilename,
+			Filename:         mediaFilename,
 			FileURL:          fileURL,
 			MetadataFilename: metadataFilename,
 			MetadataFileURL:  metadataFileURL,
@@ -379,9 +382,9 @@ func (u Uploader) handleArchive(archiveJSONFilePath string, split bool) bool {
 	}
 
 	// 処理し終わったファイルを削除
-	jsonError := u.removeArchiveJSONFile(archiveJSONFilePath, webmFilepath)
-	webmError := u.removeArchiveWEBMFile(archiveJSONFilePath, webmFilepath)
-	return jsonError == nil && webmError == nil
+	jsonError := u.removeArchiveJSONFile(archiveJSONFilePath, mediaFilepath)
+	mediaFileError := u.removeArchiveMediaFile(archiveJSONFilePath, mediaFilepath)
+	return jsonError == nil && mediaFileError == nil
 }
 
 func (u Uploader) handleReport(reportJSONFilePath string) bool {
@@ -467,6 +470,19 @@ func (u Uploader) handleReport(reportJSONFilePath string) bool {
 			Filename:    filename,
 			FileURL:     fileURL,
 		}
+
+		// recording_metadata の除外設定が *無効* の時は recording_metadata をウェブフックに含める
+		// 関数は !config.ExcludeWebhookRecordingMetadata の値を返しています
+		if u.config.IncludeWebhookRecordingMetadata() {
+			// セッション録画とレガシー録画では、録画の metadata のキーが異なるための分岐
+			// SessionID が空でなければセッション録画とみなす
+			if rr.SessionID != "" {
+				w.RecordingMetadata = rr.RecordingMetadata
+			} else {
+				w.RecordingMetadata = rr.Metadata
+			}
+		}
+
 		buf, err := json.Marshal(w)
 		if err != nil {
 			zlog.Error().
@@ -630,38 +646,38 @@ func (u Uploader) handleArchiveEnd(archiveEndJSONFilePath string) bool {
 	return true
 }
 
-func (u Uploader) removeArchiveJSONFile(metadataFilePath, webmFilepath string) error {
+func (u Uploader) removeArchiveJSONFile(metadataFilePath, mediaFilepath string) error {
 	err := os.Remove(metadataFilePath)
 	if err != nil {
 		zlog.Error().
 			Err(err).
 			Int("uploader_id", u.id).
 			Str("metadata_filepath", metadataFilePath).
-			Str("archive_filepath", webmFilepath).
+			Str("media_filepath", mediaFilepath).
 			Msg("FAILED-REMOVE-METADATA-JSON-FILE")
 	} else {
 		zlog.Debug().
 			Int("uploader_id", u.id).
 			Str("metadata_filepath", metadataFilePath).
-			Str("archive_filepath", webmFilepath).
+			Str("media_filepath", mediaFilepath).
 			Msg("REMOVED-METADATA-JSON-FILE")
 	}
 	return err
 }
 
-func (u Uploader) removeArchiveWEBMFile(metadataFilePath, webmFilepath string) error {
-	err := os.Remove(webmFilepath)
+func (u Uploader) removeArchiveMediaFile(metadataFilePath, mediaFilepath string) error {
+	err := os.Remove(mediaFilepath)
 	if err != nil {
 		zlog.Error().
 			Err(err).
 			Int("uploader_id", u.id).
-			Str("archive_filepath", webmFilepath).
-			Msg("FAILED-REMOVE-ARCHIVE-WEBM-FILE")
+			Str("media_filepath", mediaFilepath).
+			Msg("FAILED-REMOVE-ARCHIVE-MEDIA-FILE")
 	} else {
 		zlog.Debug().
 			Int("uploader_id", u.id).
-			Str("archive_filepath", webmFilepath).
-			Msg("remove archive webm file successfully.")
+			Str("media_filepath", mediaFilepath).
+			Msg("REMOVED-ARCHIVE-MEDIA-FILE-SUCCESSFULLY")
 	}
 	return err
 }

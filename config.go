@@ -56,6 +56,8 @@ type Config struct {
 	WebhookTypeSplitArchiveEndUploaded string `ini:"webhook_type_split_archive_end_uploaded"`
 	WebhookTypeReportUploaded          string `ini:"webhook_type_report_uploaded"`
 
+	ExcludeWebhookRecordingMetadata bool `ini:"exclude_webhook_recording_metadata"`
+
 	WebhookBasicAuthUsername string `ini:"webhook_basic_auth_username"`
 	WebhookBasicAuthPassword string `ini:"webhook_basic_auth_password"`
 
@@ -76,4 +78,8 @@ func newConfig(configFilePath string) (*Config, error) {
 		return nil, err
 	}
 	return config, nil
+}
+
+func (c Config) IncludeWebhookRecordingMetadata() bool {
+	return !c.ExcludeWebhookRecordingMetadata
 }

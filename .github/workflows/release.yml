@@ -7,7 +7,7 @@ on:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -22,6 +22,7 @@ jobs:
       - name: Build
         run: |
           GOOS=linux GOARCH=amd64 go build -o dist/sora-archive-uploader_linux_amd64 cmd/sora-archive-uploader/main.go
+          GOOS=linux GOARCH=arm64 go build -o dist/sora-archive-uploader_linux_arm64 cmd/sora-archive-uploader/main.go
           GOOS=darwin GOARCH=amd64 go build -o dist/sora-archive-uploader_darwin_amd64 cmd/sora-archive-uploader/main.go
           GOOS=darwin GOARCH=arm64 go build -o dist/sora-archive-uploader_darwin_arm64 cmd/sora-archive-uploader/main.go
           gzip dist/*

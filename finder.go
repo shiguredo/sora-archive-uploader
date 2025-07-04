@@ -17,7 +17,7 @@ func runFileFinder(archiveDir string) ([]string, error) {
 		zlog.Err(err).Msg("ERROR-RUN-FILE-FINDER")
 		return result, err
 	}
-	replaceWebmPattern := regexp.MustCompile(`.json$`)
+	replaceFilenamePattern := regexp.MustCompile(`.json$`)
 	for _, f := range files {
 		if !f.IsDir() {
 			continue
@@ -50,18 +50,27 @@ func runFileFinder(archiveDir string) ([]string, error) {
 					Msg("FOUND-AT-FINDER")
 				result = append(result, fullpath)
 			} else if strings.HasPrefix(filename, "archive-") || strings.HasPrefix(filename, "split-archive-") {
-				// webm ファイルの存在を確認し、ファイルが存在したら後続の処理にファイルパスを渡す
-				// webm ファイルが存在しない場合は、次回のスクレイピングのタイミングで処理する
-				webmFilename := replaceWebmPattern.ReplaceAllString(filename, ".webm")
+				// webm または mp4 ファイルの存在を確認し、ファイルが存在したら後続の処理にファイルパスを渡す
+				// webm または mp4 ファイルが存在しない場合は、次回のスクレイピングのタイミングで処理する
+				webmFilename := replaceFilenamePattern.ReplaceAllString(filename, ".webm")
 				webmFullpath := filepath.Join(dirPath, webmFilename)
-				if info, err := os.Stat(webmFullpath); err != nil || info.IsDir() {
-					continue
+				if info, err := os.Stat(webmFullpath); err == nil && !info.IsDir() {
+					zlog.Debug().
+						Str("file_path", fullpath).
+						Str("media_file_path", webmFullpath).
+						Msg("FOUND-AT-FINDER")
+					result = append(result, fullpath)
 				}
-				zlog.Debug().
-					Str("file_path", fullpath).
-					Str("webm_file_path", webmFullpath).
-					Msg("FOUND-AT-FINDER")
-				result = append(result, fullpath)
+				// .mp4 でも同様に確認する
+				mp4FileName := replaceFilenamePattern.ReplaceAllString(filename, ".mp4")
+				mp4Fullpath := filepath.Join(dirPath, mp4FileName)
+				if info, err := os.Stat(mp4Fullpath); err == nil && !info.IsDir() {
+					zlog.Debug().
+						Str("file_path", fullpath).
+						Str("media_file_path", mp4Fullpath).
+						Msg("FOUND-AT-FINDER")
+					result = append(result, fullpath)
+				}
 			} else {
 				zlog.Debug().
 					Str("file_path", fullpath).

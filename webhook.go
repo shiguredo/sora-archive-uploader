@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -12,13 +13,14 @@ import (
 )
 
 type WebhookReportUploaded struct {
-	ID          string    `json:"id"`
-	Type        string    `json:"type"`
-	Timestamp   time.Time `json:"timestamp"`
-	RecordingID string    `json:"recording_id"`
-	ChannelID   string    `json:"channel_id"`
-	Filename    string    `json:"filename"`
-	FileURL     string    `json:"file_url"`
+	ID                string          `json:"id"`
+	Type              string          `json:"type"`
+	Timestamp         time.Time       `json:"timestamp"`
+	RecordingID       string          `json:"recording_id"`
+	ChannelID         string          `json:"channel_id"`
+	Filename          string          `json:"filename"`
+	FileURL           string          `json:"file_url"`
+	RecordingMetadata json.RawMessage `json:"recording_metadata,omitempty"`
 }
 
 type WebhookArchiveUploaded struct {
@@ -124,6 +126,7 @@ func (u Uploader) httpClientDo(client *http.Client, webhookType string, buf []by
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("status_code: %d", resp.StatusCode)
 	}
