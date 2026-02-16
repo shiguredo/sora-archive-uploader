@@ -11,6 +11,17 @@
 
 ## develop
 
+## 2025.1.1
+
+- [UPDATE] go のバージョンを 1.26.0 に上げる
+  - @voluntas
+- [UPDATE] actions/setup-go@v6 に上げる
+  - @voluntas
+- [UPDATE] actions/checkout@v6 に上げる
+  - @voluntas
+- [UPDATE] dominikh/staticcheck-action の staticcheck を 2026.1 に上げる
+  - @voluntas
+
 ## 2025.1.0
 
 - [CHANGE] アップロードする録画データのファイルを `.webm` だけではなく `.mp4` のスクレイピングにも対応する
