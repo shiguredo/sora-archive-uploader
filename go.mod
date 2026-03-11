@@ -1,11 +1,11 @@
 module github.com/shiguredo/sora-archive-uploader
 
-go 1.26.0
+go 1.26.1
 
 require (
 	github.com/conduitio/bwlimit v0.1.0
 	github.com/google/uuid v1.6.0
-	github.com/minio/minio-go/v7 v7.0.98
+	github.com/minio/minio-go/v7 v7.0.99
 	github.com/rs/zerolog v1.34.0
 	github.com/shogo82148/go-clockwork-base32 v1.1.0
 	github.com/stretchr/testify v1.11.1
@@ -17,7 +17,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
-	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/klauspost/crc32 v1.3.0 // indirect
@@ -31,9 +30,9 @@ require (
 	github.com/tinylib/msgp v1.6.3 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.48.0 // indirect
-	golang.org/x/net v0.50.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
-	golang.org/x/time v0.14.0 // indirect
+	golang.org/x/time v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
