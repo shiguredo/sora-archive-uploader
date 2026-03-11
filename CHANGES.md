@@ -11,6 +11,8 @@
 
 ## develop
 
+## 2025.1.2
+
 - [UPDATE] go のバージョンを 1.26.1 に上げる
   - @tnamao
 - [CHANGE] GitHub Actions のリリースワークフローを変更し、成果物のファイル名にバージョン番号を含める
