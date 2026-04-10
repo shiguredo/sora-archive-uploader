@@ -9,7 +9,10 @@
 - FIX
   - バグ修正
 
-## develop
+## 2025.1.3
+
+- [UPDATE] go のバージョンを 1.26.2 に上げる
+  - @tnamao
 
 - [CHANGE] 設定ファイルの `uploaded_file_cache_size` は使用していないので定義を削除する
   - @tnamao
